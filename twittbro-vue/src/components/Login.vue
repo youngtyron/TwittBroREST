@@ -1,0 +1,52 @@
+<template>
+  <div>
+    <input v-model='login' type='text' placeholder="Логин"/>
+    <input v-model='password' type='password' placeholder="Пароль"/>
+    <button @click='setLogin'>Войти</button>
+    <p class='blue-link' @click='goRegistrate'>Зарегистрироваться</p>
+  </div>
+</template>
+
+<script>
+
+    export default{
+      name: 'Login',
+      data() {
+        return {
+          login: '',
+          password: '',
+        }
+      },
+      methods: {
+        setLogin(){
+          $.ajax({
+            url: 'http://127.0.0.1:8000/auth/token/create/',
+            type:'POST',
+            data: {
+              username: this.login,
+              password: this.password
+            },
+            success: (response)=>{
+              alert('Добро пожаловать!')
+              sessionStorage.setItem('auth_token', response.data.attributes.auth_token)
+              this.$router.push({name: 'mywall'})
+            },
+            error:(response)=>{
+              if (response.status === 400){
+                alert("Логин или пароль не верен")
+              }
+            }
+          })
+        },
+        goRegistrate() {
+          this.$router.push({name: "registration"})
+        },
+      },
+    }
+</script>
+
+<style scoped>
+  .blue-link{
+    color: blue;
+  }
+</style>

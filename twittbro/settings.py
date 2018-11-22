@@ -28,6 +28,26 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
+#РАЗРЕШЕНИЕ КРОССДОМЕННЫХ ЗАПРОСОВ
+
+CORS_ORIGIN_ALLOW_ALL=True
+# CORS_ALLOW_CREDENTIALS = False
+
+# CORS_ALLOW_METHODS = (
+#     'DELETE',
+#     'GET',
+#     'OPTIONS',
+#     'PATCH',
+#     'POST',
+#     'PUT',
+# )
+
+# CORS_ORIGIN_WHITELIST = (
+#     'localhost:8000',
+#     '127.0.0.1:8080'
+# )
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -41,9 +61,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
+    'profiles',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -51,7 +74,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+
 ]
 
 ROOT_URLCONF = 'twittbro.urls'
@@ -156,7 +179,6 @@ REST_FRAMEWORK = {
     'DEFAULT_METADATA_CLASS': 'rest_framework_json_api.metadata.JSONAPIMetadata',
 }
 
-CORS_ORIGIN_ALLOW_ALL = True
 
 
 try:
