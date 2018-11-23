@@ -6,7 +6,6 @@
       <mu-button flat slot='right' v-else @click='logout'>Выход</mu-button>
     </mu-appbar>
     <slot></slot>
-    Hello!
   </mu-container>
 </template>
 
