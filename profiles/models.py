@@ -20,7 +20,7 @@ class Post(models.Model):
     author = models.ForeignKey(User, verbose_name="Автор", on_delete = models.CASCADE)
     text = models.CharField(max_length = 400, null = True, blank = True, verbose_name="Текст")
     pub_date = models.DateTimeField("Дата отправки", auto_now_add=True)
-    # likes_quanity = models.IntegerField(default = 0)
+    likes_quanity = models.IntegerField(default = 0)
     # repost = models.ForeignKey('Post', on_delete = models.CASCADE, related_name = 'reposted', null = True, blank = True)
     # is_repost = models.BooleanField(default = False)
     # comments_quanity = models.IntegerField(default = 0)
@@ -31,3 +31,33 @@ class Post(models.Model):
         ordering = ['-pub_date']
         verbose_name = "Пост пользователя"
         verbose_name_plural = "Посты пользователей"
+
+    def like(self, user):
+        Like.objects.create(post = self, liker = user)
+        self.likes_quanity = self.likes_quanity + 1
+        self.save()
+        return
+
+    def unlike(self, user):
+        like = Like.objects.get(post = self, liker = user)
+        self.likes_quanity = self.likes_quanity - 1
+        self.save()
+        like.delete()
+        return
+
+    def user_can_likes(self, user):
+        num_likes = Like.objects.filter(post  =self, liker = user).count()
+        if num_likes>0:
+            return False
+        else:
+            return True
+
+
+class Like(models.Model):
+    liker = models.ForeignKey(User, on_delete = models.CASCADE, verbose_name="Оценивший пользователь")
+    post = models.ForeignKey(Post, on_delete = models.CASCADE, verbose_name="Понравившийся пост")
+    when = models.DateTimeField("Дата оценки", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Лайк"
+        verbose_name_plural = "Лайки"

@@ -1,16 +1,23 @@
 <template>
-  <div>
-    <input v-model='login' type='text' placeholder="Логин"/>
-    <input v-model='password' type='password' placeholder="Пароль"/>
-    <button @click='setLogin'>Войти</button>
-    <p class='blue-link' @click='goRegistrate'>Зарегистрироваться</p>
-  </div>
+  <HomeSlot>
+    <div>
+      <input v-model='login' type='text' placeholder="Логин"/>
+      <input v-model='password' type='password' placeholder="Пароль"/>
+      <button @click='setLogin'>Войти</button>
+      <p class='blue-link' @click='goRegistrate'>Зарегистрироваться</p>
+    </div>
+  </HomeSlot>
 </template>
 
 <script>
 
+    import HomeSlot from '@/components/Home.vue'
+
     export default{
       name: 'Login',
+      components: {
+        HomeSlot,
+      },
       data() {
         return {
           login: '',
