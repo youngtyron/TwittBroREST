@@ -8,16 +8,19 @@ from profiles.models import Post, Like
 from profiles.serializers import PostSerializer
 from twittbro.myfunctions import its_empty_string
 
+
 class PostsView(APIView):
 
     permission_classes = [permissions.IsAuthenticated, ]
 
     def get(self, request, user_id):
-        counter = int(request.GET.get('id'))
-        print(counter)
+        counter = int(request.GET.get('last'))
         user = User.objects.get(id = user_id)
-        posts = Post.objects.filter(author = user)
-        portion_posts = posts.values_list('pk', flat=True)[counter:counter+10]
+        if counter == 0:
+            posts = Post.objects.filter(author = user)
+        else:
+            posts = Post.objects.filter(author = user, id__lt=counter)
+        portion_posts = posts.values_list('pk', flat=True)[0:10]
         posts = Post.objects.filter(pk__in = portion_posts)
         serializer = PostSerializer(posts, many=True)
         i = 0

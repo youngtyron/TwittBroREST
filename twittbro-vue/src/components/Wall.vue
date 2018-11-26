@@ -13,7 +13,6 @@
         <i v-if = 'post.red' class="fas fa-heart fa-2x liking-heart red-heart" @click='likePost'>{{post.likes_quanity}}</i>
         <i v-else class="far fa-heart fa-2x liking-heart" @click='likePost'>{{post.likes_quanity}}</i>
       </div>
-      <p v-model='lastOnPage'></p>
     </HomeSlot>
   </div>
 </template>
@@ -51,20 +50,27 @@
           }
         },
         loadPosts() {
+
+            if (this.posts.length == 0){
+              var last = 0
+            }
+            else{
+              var last = this.posts[this.posts.length - 1].id
+            }
+
             $.ajax({
                url: 'http://127.0.0.1:8000/api/profiles/posts/' + this.$route.params.id + '/',
                type: "GET",
                data: {
-                   id: this.lastOnPage,
+                   last: last,
                },
                success: (response) => {
-                   if (this.lastOnPage == 0){
+                   if (this.posts.length == 0){
                      this.posts =  response.data.data
                    }
                    else{
                      this.posts =  this.posts.concat(response.data.data)
                    }
-                   this.lastOnPage = this.lastOnPage + 10
                    if (response.data.mywall){
                      this.mywall = true;
                    }
@@ -81,7 +87,9 @@
             success: (response)=>{
               this.form.textarea = ''
               if (this.posts != ''){
-                this.posts = this.posts.unshift(response.data.data)
+                this.posts = this.posts.concat(response.data.data)
+                this.posts.unshift(this.posts[this.posts.length - 1])
+                this.posts.splice(- 1, 1)
               }
               else{
                 this.posts = response.data.data
@@ -95,14 +103,20 @@
           })
         },
         deletePost(event){
+          var id = event.target.parentNode.getAttribute('value')
           $.ajax({
             url: 'http://127.0.0.1:8000/api/profiles/delete_post/' + this.$route.params.id + '/',
             type: 'POST',
             data: {
-                id: event.target.parentNode.getAttribute('value')
+                id: id,
             },
             success: (response)=>{
-              event.target.parentNode.remove()
+              var index;
+              for (index = 0; index < this.posts.length; ++index) {
+                if (this.posts[index].id == id){
+                  this.posts.splice(index, 1)
+                }
+              }
             },
             error: (response)=> {
               alert('Ошибка. Повторите снова')
