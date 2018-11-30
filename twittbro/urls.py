@@ -16,6 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from .views import RegisterView, GetIdView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,8 +25,10 @@ urlpatterns = [
     path('auth/', include('djoser.urls.authtoken')),
     path('auth/', include('djoser.urls.jwt')),
     path('api/profiles/', include('profiles.urls')),
+    path('api/messenger/', include('messenger.urls')),
     path('api/registate/', RegisterView.as_view()),
     path('api/get_id/', GetIdView.as_view()),
 
 
 ]
+urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

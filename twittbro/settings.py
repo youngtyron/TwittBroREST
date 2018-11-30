@@ -63,6 +63,8 @@ INSTALLED_APPS = [
     'djoser',
     'profiles',
     'corsheaders',
+    'imagekit',
+    'messenger',
 ]
 
 MIDDLEWARE = [
@@ -147,10 +149,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATIC_DIR = os.path.join(BASE_DIR, 'static')
+STATIC_DIR = os.path.join(BASE_DIR, 'twittbro-vue/static')
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'twittbro-vue/static/media/')
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES' : (

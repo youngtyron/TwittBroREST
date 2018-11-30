@@ -1,13 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import User
+import PIL
+from PIL import Image
+from imagekit.models.fields import ImageSpecField
+from imagekit.processors import ResizeToFit, Adjust, ResizeToFill
 
 
 class Profile(models.Model):
     user = models.OneToOneField(User, verbose_name="Пользователь", on_delete=models.CASCADE, primary_key=True)
     registrated = models.DateField("Дата регистрации", auto_now_add=True)
-    # avatar = models.ImageField(upload_to="images/", null = True, blank = True)
-    # avatar_small = ImageSpecField([Adjust(contrast = 1, sharpness = 1), ResizeToFill(100, 100)], format = 'JPEG', options = {'quality' : 75})
-    # avatar_ultra = ImageSpecField([Adjust(contrast = 1, sharpness = 1), ResizeToFill(50, 50)], format = 'JPEG', options = {'quality' : 50})
+    avatar = models.ImageField(upload_to="images/", null = True, blank = True)
+    # avatar_profile = ImageSpecField([Adjust(contrast = 1, sharpness = 1), ResizeToFill(100, 100)], format = 'JPEG', options = {'quality' : 75})
+    # avatar_mini = ImageSpecField([Adjust(contrast = 1, sharpness = 1), ResizeToFill(50, 50)], format = 'JPEG', options = {'quality' : 50})
     # avatar_micro = ImageSpecField([Adjust(contrast = 1, sharpness = 1), ResizeToFill(25, 25)], format = 'JPEG', options = {'quality' : 25})
     rating = models.PositiveIntegerField(default = 0)
 
@@ -15,6 +19,22 @@ class Profile(models.Model):
         ordering = ['-rating']
         verbose_name = "Профиль пользователя"
         verbose_name_plural = "Профили пользователей"
+
+    def query_news(self):
+        followings = Following.objects.filter(who = self.user)
+        users = []
+        for f in followings:
+            users.append(f.to)
+        users.append(self.user)
+        return Post.objects.filter(author__in=users)
+
+    def query_news_with_counter(self, counter):
+        followings = Following.objects.filter(who = self.user)
+        users = []
+        for f in followings:
+            users.append(f.to)
+        users.append(self.user)
+        return Post.objects.filter(author__in=users, id__lt=counter)
 
 class Post(models.Model):
     author = models.ForeignKey(User, verbose_name="Автор", on_delete = models.CASCADE)
@@ -61,3 +81,15 @@ class Like(models.Model):
     class Meta:
         verbose_name = "Лайк"
         verbose_name_plural = "Лайки"
+
+class Following(models.Model):
+    who = models.ForeignKey(User, on_delete = models.CASCADE, verbose_name="Подписавшийся пользователь", related_name = 'followings')
+    to = models.ForeignKey(User, on_delete = models.CASCADE, verbose_name="Пользователь на которого подписались", related_name = 'followers')
+    fol_date = models.DateTimeField("Дата подписки", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
+
+    def __str__(self):
+        return '%s to -> %s' % (self.who, self.to)

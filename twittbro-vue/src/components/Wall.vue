@@ -1,14 +1,21 @@
 <template>
   <div>
     <HomeSlot>
+      <div class="user-info">
+        <p class="user-name">{{user.first_name}} {{user.last_name}}</p>
+        <img class='avatar' alt=''/>
+        <div v-if='!mywall'>
+          <mu-button v-if='!you_follow' flat color="secondary" @click="followUser">Подписаться</mu-button>
+          <mu-button v-else flat color="primary" @click="followUser">Отписаться</mu-button>
+        </div>
+      </div>
       <div v-if='mywall'>
         <mu-text-field  v-model="form.textarea" placeholder="Отправьте новый пост"></mu-text-field>
         <mu-button round color="secondary" @click="newPost">Отправить</mu-button>
       </div>
-      <div v-for='post in posts' :value="post.id">
+      <div class='central-strip' v-for='post in posts' :value="post.id">
         <i @click='deletePost' v-if='mywall' class="fas fa-times fa-2x deleting-cross" v-on:mouseover = 'darkCross' v-on:mouseout = 'lightCross'></i>
-        <p>{{post.author.first_name}} {{post.author.last_name}}</p>
-        <p>{{post.text}}</p>
+        <p class='post-text'>{{post.text}}</p>
         <p>{{post.pub_date}}</p>
         <i v-if = 'post.red' class="fas fa-heart fa-2x liking-heart red-heart" @click='likePost'>{{post.likes_quanity}}</i>
         <i v-else class="far fa-heart fa-2x liking-heart" @click='likePost'>{{post.likes_quanity}}</i>
@@ -23,6 +30,9 @@
 
     export default{
       name: 'Wall',
+      props: {
+          id: '',
+      },
       components: {
         HomeSlot,
       },
@@ -33,14 +43,17 @@
             textarea: '',
           },
           mywall: '',
-          lastOnPage: 0,
+          user: '',
+          you_follow: '',
         }
       },
       created() {
            $.ajaxSetup({
                headers: {'Authorization': "Token " + sessionStorage.getItem('auth_token')},
            });
-           this.loadPosts()
+           this.loadUser();
+           this.getAva();
+           this.loadPosts();
            window.addEventListener('scroll', this.scrollToCounter);
       },
       methods: {
@@ -49,8 +62,52 @@
             this.loadPosts()
           }
         },
-        loadPosts() {
+        getAva(){
+          $.ajax({
+             url: 'http://127.0.0.1:8000/api/profiles/avatar/' + this.$route.params.id + '/',
+             type: "GET",
+             success: (response) => {
+                 var ava_url = '/static' + response.data.data
+                 $(".avatar").attr("src", ava_url);
+             },
+             error: (response)=> {
+               $(".avatar").attr("src", '/static/static/images/avatar.jpeg');
+             },
+          })
+        },
+        followUser(){
+          $.ajax({
+             url: 'http://127.0.0.1:8000/api/profiles/follow/' + this.$route.params.id + '/',
+             type: "POST",
+             success: (response) => {
+               if (response.data.create_follow){
+                 this.you_follow = true
+                 alert('Теперь вы подписаны на этого пользователя')
+               }
+               else if (response.data.delete_follow){
+                 this.you_follow = false
+                 alert('Вы отписались от этого пользователя')
 
+               }
+             },
+             error: (response)=> {
+               alert('Ошибка. Повторите снова')
+             },
+          })
+        },
+        loadUser(){
+          $.ajax({
+             url: 'http://127.0.0.1:8000/api/profiles/user/' + this.$route.params.id + '/',
+             type: "GET",
+             success: (response) => {
+                this.user =  response.data.data
+                if (response.data.you_follow){
+                  this.you_follow = true
+                }
+             }
+          })
+        },
+        loadPosts() {
             if (this.posts.length == 0){
               var last = 0
             }
@@ -86,6 +143,10 @@
             },
             success: (response)=>{
               this.form.textarea = ''
+              if (response.data.empty){
+                alert('Введите текст в поле ввода')
+              }
+              else{
               if (this.posts != ''){
                 this.posts = this.posts.concat(response.data.data)
                 this.posts.unshift(this.posts[this.posts.length - 1])
@@ -94,12 +155,8 @@
               else{
                 this.posts = response.data.data
               }
-            },
-            error: (response)=> {
-              if (response.data == 'empty'){
-                alert('Введите текст в поле ввода')
               }
-            }
+            },
           })
         },
         deletePost(event){
@@ -168,5 +225,25 @@
   }
   .red-heart{
     color: crimson;
+  }
+  .user-info{
+    float: left;
+    /* position: fixed; */
+  }
+  .post-text{
+    font-size: 150%;
+  }
+  .user-name{
+    font-size: 150%;
+    color: #039be5;
+  }
+  .central-strip{
+    width: 60%;
+    margin: auto;
+  }
+  .avatar{
+    width: 150px;
+    height: 150px;
+    border-radius: 100px;
   }
 </style>
