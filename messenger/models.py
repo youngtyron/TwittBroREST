@@ -14,6 +14,12 @@ class Chat(models.Model):
         verbose_name = "Чат"
         verbose_name_plural = "Чаты"
 
+    def query_messages(self):
+        return self.messages.all().order_by('-pub_date')
+
+    def query_messages_with_counter(self, counter):
+        return Message.objects.filter(chat=self, id__lt=counter).order_by('-pub_date')
+
 class Message(models.Model):
     writer = models.ForeignKey(User, on_delete = models.CASCADE, related_name = 'his_written_messages', verbose_name='Автор сообщения')
     chat = models.ForeignKey(Chat, on_delete = models.CASCADE, related_name = 'messages', verbose_name='Чат, к которому относится сообщение' )
@@ -23,7 +29,13 @@ class Message(models.Model):
     who_read = models.ManyToManyField(User, related_name = 'read_messages', verbose_name='Кто прочел сообщение')
 
     class Meta:
-        ordering=['-pub_date']
+        ordering=['pub_date']
         get_latest_by = 'pub_date'
         verbose_name = "Сообщение"
         verbose_name_plural = "Сообщения"
+
+    def is_grey(self, user):
+        if user in self.who_read.all():
+            return False
+        else:
+            return True

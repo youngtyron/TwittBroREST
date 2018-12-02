@@ -7,6 +7,22 @@ from messenger.serializers import ChatSerializer, MessagesSerializer
 from twittbro.myfunctions import its_empty_string
 
 
+class ReadView(APIView):
+
+    permission_classes = [permissions.IsAuthenticated, ]
+
+    def post(self, request, chat_id):
+        chat = Chat.objects.get(id = chat_id)
+        if chat in request.user.chats.all():
+            ids = list(dict(request.POST).values())[0]
+            for id in ids:
+                message = Message.objects.get(id = id)
+                message.who_read.add(request.user)
+            return Response(status=201)
+        else:
+            return Response(status=400)
+
+
 class ChatListView(APIView):
 
     permission_classes = [permissions.IsAuthenticated, ]
@@ -23,8 +39,22 @@ class DialogueView(APIView):
     def get(self, request, chat_id):
         chat = Chat.objects.get(id = chat_id)
         if chat in request.user.chats.all():
-            messages = chat.messages.all()
+            counter = int(request.GET.get('last'))
+            if counter == 0:
+                messages = chat.query_messages()
+            else:
+                messages = chat.query_messages_with_counter(counter)
+            portion_messages = messages.values_list('pk', flat=True)[0:10]
+            messages = Message.objects.filter(pk__in = portion_messages)
             serializer = MessagesSerializer(messages, many=True)
+            i = 0
+            while i < messages.count():
+                message = messages.get(id = serializer.data[i]['id'])
+                if message.is_grey(request.user):
+                    serializer.data[i].update({'grey': True})
+                else:
+                    serializer.data[i].update({'grey': False})
+                i = i+1
             return Response({'data': serializer.data})
         else:
             return Response(status=400)

@@ -6,4 +6,5 @@ from messenger.views import *
 urlpatterns = [
     path('chats/', ChatListView.as_view()),
     path('chat/<int:chat_id>/', DialogueView.as_view()),
+    path('read/<int:chat_id>/', ReadView.as_view()),
 ]

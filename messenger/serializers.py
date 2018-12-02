@@ -14,5 +14,5 @@ class MessagesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ('writer', 'text', 'pub_date', 'is_read', 'who_read')
+        fields = ('writer', 'text', 'pub_date', 'is_read', 'who_read', 'id')
         depth = 1
