@@ -1,55 +1,67 @@
 <template>
-  <div v-on:mousemove='readMessages'>
+  <div v-on:mousemove='prereadMessages'>
     <HomeSlot>
-      <div class="user-info">
-        <p class="user-name">{{user.first_name}} {{user.last_name}}</p>
-        <img class='avatar' alt=''/>
 
-      </div>
+        <div class="user-info">
+          <p class="user-name">{{user.first_name}} {{user.last_name}}</p>
+          <img class='avatar' alt=''/>
 
-
-
-
-        <div id="message-box" v-on:scroll='scrollBox'>
+        </div>
 
 
-          <div class='central-strip' v-for='message in messages' :value='message.id'>
-            <div class='one-message grey' v-if='message.grey' :id='message.id'>
-              <p v-if='message.writer.id == user.id' class='message-author right-message' >{{message.writer.first_name}}</p>
-              <p v-else class='message-author left-message' >{{message.writer.first_name}}</p>
+          <div id="message-box" v-on:scroll='scrollBox'>
 
 
-              <p v-if='message.writer.id == user.id'class='message-text right-message'>{{message.text}}</p>
-              <p v-else class='message-text left-message'>{{message.text}}</p>
+            <div class='central-strip' v-for='message in messages' :value='message.id'>
+              <div class='one-message grey my_grey' v-if='message.my_grey' :id='message.id'>
+                <p v-if='message.writer.id == user.id' class='message-author right-message' >{{message.writer.first_name}}</p>
+                <p v-else class='message-author left-message' >{{message.writer.first_name}}</p>
 
 
-              <p v-if='message.writer.id == user.id' class='message-date right-message'>{{message.pub_date}}</p>
-              <p v-else class='message-date left-message'>{{message.pub_date}}</p>
+                <p v-if='message.writer.id == user.id'class='message-text right-message'>{{message.text}}</p>
+                <p v-else class='message-text left-message'>{{message.text}}</p>
 
+
+                <p v-if='message.writer.id == user.id' class='message-date right-message'>{{message.pub_date}}</p>
+                <p v-else class='message-date left-message'>{{message.pub_date}}</p>
+
+              </div>
+              <div class='one-message grey' v-else-if='message.grey' :id='message.id'>
+                <p v-if='message.writer.id == user.id' class='message-author right-message' >{{message.writer.first_name}}</p>
+                <p v-else class='message-author left-message' >{{message.writer.first_name}}</p>
+
+
+                <p v-if='message.writer.id == user.id'class='message-text right-message'>{{message.text}}</p>
+                <p v-else class='message-text left-message'>{{message.text}}</p>
+
+
+                <p v-if='message.writer.id == user.id' class='message-date right-message'>{{message.pub_date}}</p>
+                <p v-else class='message-date left-message'>{{message.pub_date}}</p>
+
+              </div>
+
+              <div class='one-message white' v-else :id='message.id'>
+                <p v-if='message.writer.id == user.id' class='message-author right-message' >{{message.writer.first_name}}</p>
+                <p v-else class='message-author left-message' >{{message.writer.first_name}}</p>
+
+
+                <p v-if='message.writer.id == user.id'class='message-text right-message'>{{message.text}}</p>
+                <p v-else class='message-text left-message'>{{message.text}}</p>
+
+
+                <p v-if='message.writer.id == user.id' class='message-date right-message'>{{message.pub_date}}</p>
+                <p v-else class='message-date left-message'>{{message.pub_date}}</p>
+
+              </div>
             </div>
 
-            <div class='one-message white' v-else :id='message.id'>
-              <p v-if='message.writer.id == user.id' class='message-author right-message' >{{message.writer.first_name}}</p>
-              <p v-else class='message-author left-message' >{{message.writer.first_name}}</p>
 
-
-              <p v-if='message.writer.id == user.id'class='message-text right-message'>{{message.text}}</p>
-              <p v-else class='message-text left-message'>{{message.text}}</p>
-
-
-              <p v-if='message.writer.id == user.id' class='message-date right-message'>{{message.pub_date}}</p>
-              <p v-else class='message-date left-message'>{{message.pub_date}}</p>
-
-            </div>
           </div>
 
-
-        </div>
-
-        <div class='print-block'>
-          <mu-text-field  v-model="form.textarea" placeholder="Отправьте новое сообщение"></mu-text-field>
-          <mu-button round color="secondary" @click="sendMessage">Отправить</mu-button>
-        </div>
+          <div class='print-block'>
+            <mu-text-field  v-model="form.textarea" placeholder="Отправьте новое сообщение"></mu-text-field>
+            <mu-button round color="secondary" @click="sendMessage">Отправить</mu-button>
+          </div>
 
     </HomeSlot>
   </div>
@@ -84,11 +96,35 @@
            this.loadMyUser();
            this.getAva();
            this.loadMessages();
+           // setInterval(() => {
+           //   this.newMessages()
+           // }, 5000)
 
       },
       methods: {
+        newMessages(){
+          var newest = this.messages[this.messages.length - 1].id
+          $.ajax({
+            url: 'http://127.0.0.1:8000/api/messenger/new/' + this.$route.params.id + '/',
+            type: 'GET',
+            data: {
+              newest: newest,
+            },
+            success: (response)=>{
+              if (response.data.not_new!=true){
+                this.messages = this.messages.concat(response.data.data)
+              }
+            },
+          })
+        },
+        prereadMessages(){
+          var my_grey = $('.my_grey');
+          if (my_grey.length > 0){
+            this.readMessages()
+          }
+        },
         readMessages(){
-          var grey = $('.grey');
+          var grey = $('.my_grey');
           var ids = new Array()
           for (var i = 0; i < grey.length; i++){
             ids[i]=grey[i].parentNode.getAttribute('value')
@@ -100,10 +136,11 @@
               ids,
             },
             success: (response)=>{
-              for (var i = 0; i < grey.length; i++){
-                var el = document.getElementById(ids[i])
-                el.classList.add("white")
-                el.classList.remove("grey")
+              for (var i = 0; i < response.data.white.length; i++){
+                var elem = document.getElementById(response.data.white[i])
+                elem.classList.add("white")
+                elem.classList.remove("my_grey")
+                elem.classList.remove("grey")
               }
             },
           })
@@ -157,6 +194,7 @@
                 alert('Введите текст в поле ввода')
               }
               else{
+                console.log(response.data.data)
                 this.messages = this.messages.concat(response.data.data)
               }
             },

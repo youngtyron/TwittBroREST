@@ -7,6 +7,23 @@ from messenger.serializers import ChatSerializer, MessagesSerializer
 from twittbro.myfunctions import its_empty_string
 
 
+class NewMessagesView(APIView):
+
+    permission_classes = [permissions.IsAuthenticated, ]
+
+    def get(self, request, chat_id):
+        newest = request.GET.get('newest')
+        chat = Chat.objects.get(id = chat_id)
+        if chat in request.user.chats.all():
+            messages = chat.query_newer_messages(newest)
+            if messages.exists():
+                serializer = MessagesSerializer(messages, many=True)
+                return Response({'data': serializer.data})
+            else:
+                return Response(status = 201, data = {'not_new': True})
+        else:
+            return Response(status=400)
+
 class ReadView(APIView):
 
     permission_classes = [permissions.IsAuthenticated, ]
@@ -15,10 +32,14 @@ class ReadView(APIView):
         chat = Chat.objects.get(id = chat_id)
         if chat in request.user.chats.all():
             ids = list(dict(request.POST).values())[0]
+            white = []
             for id in ids:
                 message = Message.objects.get(id = id)
                 message.who_read.add(request.user)
-            return Response(status=201)
+                message.checking_on_read()
+                if not message.is_grey_for_me(request.user):
+                    white.append(message.id)
+            return Response(status=201, data={'white': white})
         else:
             return Response(status=400)
 
@@ -30,6 +51,11 @@ class ChatListView(APIView):
     def get(self, request):
         chats = request.user.chats.all()
         serializer = ChatSerializer(chats, many=True)
+        i = 0
+        while i < chats.count():
+            chat = chats.get(id = serializer.data[i]['id'])
+            serializer.data[i].update({'new': chat.count_new_messages(request.user)})
+            i = i+1
         return Response({'data': serializer.data})
 
 class DialogueView(APIView):
@@ -52,8 +78,8 @@ class DialogueView(APIView):
                 message = messages.get(id = serializer.data[i]['id'])
                 if message.is_grey(request.user):
                     serializer.data[i].update({'grey': True})
-                else:
-                    serializer.data[i].update({'grey': False})
+                if message.is_grey_for_me(request.user):
+                    serializer.data[i].update({'my_grey': True})
                 i = i+1
             return Response({'data': serializer.data})
         else:
@@ -68,7 +94,7 @@ class DialogueView(APIView):
             else:
                 message = Message.objects.create(writer = request.user, text=text, chat=chat)
                 message.who_read.add(request.user)
-                serializer = MessagesSerializer(message)
+                serializer = MessagesSerializer(message, context={'grey': True})
                 return Response({"data": serializer.data})
         else:
             return Response(status=400)

@@ -20,6 +20,16 @@ class Chat(models.Model):
     def query_messages_with_counter(self, counter):
         return Message.objects.filter(chat=self, id__lt=counter).order_by('-pub_date')
 
+    def query_newer_messages(self, newest):
+        return Message.objects.filter(chat=self, id__gt=newest)
+
+    def count_new_messages(self, user):
+        counter = 0
+        for message in self.messages.all().filter(is_read = False):
+            if message.is_grey_for_me(user):
+                counter =+ 1
+        return counter
+
 class Message(models.Model):
     writer = models.ForeignKey(User, on_delete = models.CASCADE, related_name = 'his_written_messages', verbose_name='Автор сообщения')
     chat = models.ForeignKey(Chat, on_delete = models.CASCADE, related_name = 'messages', verbose_name='Чат, к которому относится сообщение' )
@@ -34,8 +44,27 @@ class Message(models.Model):
         verbose_name = "Сообщение"
         verbose_name_plural = "Сообщения"
 
+
     def is_grey(self, user):
-        if user in self.who_read.all():
+        if self.is_read:
             return False
         else:
+            if self.chat.is_group:
+                if user in self.who_read.all() and self.who_read.all().count()>=2:
+                    return False
+                else:
+                    return True
+            else:
+                return True
+
+    def is_grey_for_me(self, user):
+        if user not in self.who_read.all():
             return True
+        else:
+            return False
+
+    def checking_on_read(self):
+        if self.who_read.all().count() == self.chat.members.all().count():
+            self.is_read = True
+            self.save()
+            return

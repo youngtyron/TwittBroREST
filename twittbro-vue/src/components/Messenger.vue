@@ -1,19 +1,20 @@
 <template>
   <div>
     <HomeSlot>
-      <div class="user-info">
-        <p class="user-name">{{user.first_name}} {{user.last_name}}</p>
-        <img class='avatar' alt=''/>
+        <div class="user-info">
+          <p class="user-name">{{user.first_name}} {{user.last_name}}</p>
+          <img class='avatar' alt=''/>
 
-      </div>
-        <div class='central-strip' v-for='chat in chats' >
-          <div :id="chat.id" class="dialogue" @click='oneDialog(chat.id)'>
-            <p>{{chat.name}}</p>
-            <div v-for='member in chat.member'>
-              {{member.username}}
+        </div>
+          <div class='central-strip' v-for='chat in chats' >
+            <div :id="chat.id" class="dialogue" @click='oneDialog(chat.id)'>
+              <p>{{chat.name}}<mu-badge v-if='chat.new' v-bind:content='String(chat.new)' circle color="secondary"  class="demo-icon-badge"></mu-badge></p>
+              <div v-for='member in chat.member'>
+                {{member.username}}
+              </div>
+
             </div>
           </div>
-        </div>
     </HomeSlot>
   </div>
 </template>
