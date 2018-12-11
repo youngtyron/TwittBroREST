@@ -7,7 +7,7 @@ from imagekit.processors import ResizeToFit, Adjust, ResizeToFill
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, verbose_name="Пользователь", on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(User, verbose_name="Пользователь", on_delete=models.CASCADE, primary_key=True, related_name = 'profile')
     registrated = models.DateField("Дата регистрации", auto_now_add=True)
     avatar = models.ImageField(upload_to="images/", null = True, blank = True)
     # avatar_profile = ImageSpecField([Adjust(contrast = 1, sharpness = 1), ResizeToFill(100, 100)], format = 'JPEG', options = {'quality' : 75})

@@ -7,14 +7,19 @@ from profiles.serializers import UserSerializer
 class ChatSerializer(serializers.ModelSerializer):
 
     new = serializers.SerializerMethodField()
+    chat_name = serializers.SerializerMethodField()
+
 
     class Meta:
         model = Chat
-        fields = ('name', 'members', 'is_group', 'id', 'new')
+        fields = ('name', 'members', 'is_group', 'id', 'new', 'chat_name')
         depth = 1
 
     def get_new(self, obj):
         return self.context.get('new')
+
+    def get_chat_name(self, obj):
+        return self.context.get('chat_name')
 
 class MessagesSerializer(serializers.ModelSerializer):
 

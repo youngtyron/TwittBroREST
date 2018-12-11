@@ -8,11 +8,15 @@
 
         </div>
 
+          <div class="chat-info">
+            <p v-for='companion in chat.chat_name' :id = 'companion.id' @click='companionLink(companion.id)'>{{companion.first_name}} {{companion.last_name}}</p>
+          </div>
 
           <div id="message-box" v-on:scroll='scrollBox'>
 
 
             <div class='central-strip' v-for='message in messages' :value='message.id'>
+
               <div class='one-message grey my_grey' v-if='message.my_grey' :id='message.id'>
                 <p v-if='message.writer.id == user.id' class='message-author right-message' >{{message.writer.first_name}}</p>
                 <p v-else class='message-author left-message' >{{message.writer.first_name}}</p>
@@ -87,6 +91,7 @@
             textarea: '',
           },
           last: '',
+          chat: '',
         }
       },
       created() {
@@ -96,12 +101,15 @@
            this.loadMyUser();
            this.getAva();
            this.loadMessages();
-           // setInterval(() => {
-           //   this.newMessages()
-           // }, 5000)
+           setInterval(() => {
+             this.newMessages()
+           }, 10000)
 
       },
       methods: {
+        companionLink(id){
+          this.$router.push({name: 'wall', params: {id: id}})
+        },
         newMessages(){
           var newest = this.messages[this.messages.length - 1].id
           $.ajax({
@@ -171,6 +179,7 @@
                else {
                  this.messages =  response.data.data.concat(this.messages)
                }
+               this.chat = response.data.chatdata
                  // var block = document.getElementById("message-box");
                  // block.scrollTop = block.scrollHeight
                  $('#message-box').scrollTop = $('#message-box').scrollHeight

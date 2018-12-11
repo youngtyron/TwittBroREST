@@ -5,12 +5,37 @@
         <p class="user-name">{{user.first_name}} {{user.last_name}}</p>
         <img class='avatar' alt=''/>
         <div v-if='!mywall'>
-          <mu-button v-if='!you_follow' flat color="secondary" @click="followUser">Подписаться</mu-button>
-          <mu-button v-else flat color="primary" @click="followUser">Отписаться</mu-button>
+            <p>
+              <mu-button v-if='!you_follow' flat color="secondary" @click="followUser">Подписаться</mu-button>
+              <mu-button v-else flat color="primary" @click="followUser">Отписаться</mu-button>
+            </p>
+            <p>
+              <mu-button flat color="primary" @click="openWriterWindow">Отправить сообщение <i class="fas fa-pen-alt"></i></mu-button>
+            </p>
+            <mu-dialog width="600" max-width="80%" :esc-press-close="false" :overlay-close="false" :open.sync="openWriter">
+                <mu-text-field  :rows="4" multi-line full-width v-model="form2.textarea2" placeholder="Напечатайте текст сообщения"></mu-text-field>
+                <mu-button slot="actions" flat color="normal" @click="openAddToChat">Добавить пользователя в чат?</mu-button>
+                <mu-button slot="actions" flat color="primary" @click="closeWriterWindow">Отмена</mu-button>
+                <mu-button slot="actions" flat color="secondary" @click="writeMessage">Отправить</mu-button>
+              </mu-dialog>
+              <mu-dialog width="600" max-width="80%" :esc-press-close="false" :overlay-close="false" :open.sync="openChatsList">
+
+                <p>Выберите чат</p>
+                <select v-model="selectedChat" class="select-chat">
+                    <option v-for="chat in chats" v-bind:value="chat.id">
+                      <p v-for='member in chat.members'>{{member.first_name}} {{member.last_name}}</p>
+                    </option>
+                </select>
+
+                  <mu-button slot="actions" flat color="primary" @click="closeChatsWindow">Отмена</mu-button>
+                  <mu-button slot="actions" flat color="secondary" @click="addSelectedChat">Добавить</mu-button>
+
+              </mu-dialog>
+
         </div>
       </div>
       <div v-if='mywall'>
-        <mu-text-field  v-model="form.textarea" placeholder="Отправьте новый пост"></mu-text-field>
+        <mu-text-field v-model="form.textarea" placeholder="Отправьте новый пост"></mu-text-field>
         <mu-button round color="secondary" @click="newPost">Отправить</mu-button>
       </div>
       <div class='central-strip' v-for='post in posts' :value="post.id">
@@ -42,9 +67,16 @@
           form: {
             textarea: '',
           },
+          form2: {
+            textarea2: '',
+          },
           mywall: '',
           user: '',
           you_follow: '',
+          openWriter: false,
+          openChatsList: false,
+          chats: '',
+          selectedChat: '',
         }
       },
       created() {
@@ -57,6 +89,67 @@
            window.addEventListener('scroll', this.scrollToCounter);
       },
       methods: {
+        addSelectedChat(){
+          var chat = this.selectedChat
+          $.ajax({
+             url: 'http://127.0.0.1:8000/api/messenger/get_chats_to_add_user/' + this.$route.params.id + '/',
+             type: "POST",
+             data: {
+                 chat: chat,
+             },
+             success: (response) => {
+               this.openChatsList = false
+               alert('Пользователь добавлен в чат')
+             },
+             error: (response)=> {
+               alert('Ошибка. Повторите снова')
+             }
+          })
+        },
+
+        getChats(){
+          $.ajax({
+            url: 'http://127.0.0.1:8000/api/messenger/get_chats_to_add_user/' + this.$route.params.id + '/',
+            type: 'GET',
+            success: (response)=>{
+              this.chats = response.data.data
+            },
+          })
+        },
+        writeMessage(){
+          $.ajax({
+            url: 'http://127.0.0.1:8000/api/messenger/write/' + this.$route.params.id + '/',
+            type: 'POST',
+            data: {
+                text: this.form2.textarea2
+            },
+            success: (response)=>{
+              this.form2.textarea2 = ''
+              this.closeWriterWindow()
+              alert('Сообщение отправлено')
+
+            },
+            error: (response)=>{
+              if (response.responseJSON.errors.empty){
+                alert('Введите текст в поле ввода')
+              }
+            },
+          })
+        },
+        openAddToChat(){
+          this.openWriter = false;
+          this.openChatsList = true;
+          this.getChats();
+        },
+        closeChatsWindow(){
+          this.openChatsList = false;
+        },
+        openWriterWindow () {
+          this.openWriter = true;
+        },
+        closeWriterWindow () {
+          this.openWriter = false;
+        },
         scrollToCounter(){
           if($(window).scrollTop() + $(window).height() == $(document).height()) {
             this.loadPosts()
@@ -228,7 +321,6 @@
   }
   .user-info{
     float: left;
-    /* position: fixed; */
   }
   .post-text{
     font-size: 150%;
@@ -245,5 +337,12 @@
     width: 150px;
     height: 150px;
     border-radius: 100px;
+  }
+  .chat-in-window{
+    border: 1px solid #C1C1C1;
+  }
+  .select-chat{
+    width: 100%;
+    height: 30px;
   }
 </style>

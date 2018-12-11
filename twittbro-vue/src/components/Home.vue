@@ -13,8 +13,8 @@
       <mu-button flat color="primary" @click="goToNews">Новости</mu-button>
       <mu-button flat color="primary" @click="goToMyWall">Моя страница</mu-button>
       <mu-button flat color="primary" @click="goToFollows">Мои подписки</mu-button>
-      <mu-button flat color="primary" @click="goToMessenger">Мои сообщения</mu-button>
-      <mu-button flat color="primary" @click="">Поиск</mu-button>
+      <mu-button flat color="primary" @click="goToMessenger">Мои сообщения<mu-badge v-if='unread' v-bind:content='String(unread)' circle color="secondary"  class="demo-icon-badge"></mu-badge></mu-button>
+      <mu-button flat color="primary" @click="goToSearch">Поиск</mu-button>
 
     </mu-bottom-nav>
     <slot></slot>
@@ -26,19 +26,25 @@
 
   export default {
     name: 'Home',
-    // data() {
-    //   return {
-    //     form: {
-    //       textarea: '',
-    //     },
-    //   }
-    // },
+    data() {
+      return {
+        unread: '',
+      }
+    },
     computed: {
       auth(){
         if (sessionStorage.getItem('auth_token')){
           return true
         }
       }
+    },
+    mounted(){
+      this.newUnread()
+    },
+    created(){
+      setInterval(() => {
+        this.newUnread()
+      }, 25000)
     },
     methods:{
       goLogin(){
@@ -48,14 +54,19 @@
         sessionStorage.removeItem('auth_token')
         window.location = '/'
       },
-      // submitSearch(){
-      //   if (this.form.textarea.length === 0 || !this.form.textarea.trim()) {
-      //     alert('Введите что-нибудь')
-      //   }
-      //   else{
-      //     this.$router.push({name: 'search', params: {text: this.form.textarea}})
-      //   }
-      // },
+      newUnread(){
+        $.ajax({
+           url: 'http://127.0.0.1:8000/api/messenger/unread/',
+           type: "GET",
+           success: (response) => {
+               this.unread =  response.data.data
+             }
+        })
+      },
+      goToSearch(){
+        this.$router.push({name: 'search'})
+        // , params: {text: ''}
+      },
       goToNews(){
         this.$router.push({name: 'news'})
       },
@@ -83,6 +94,5 @@
   }
   .navbar{
     width: 100%;
-    /* position: fixed; */
   }
 </style>

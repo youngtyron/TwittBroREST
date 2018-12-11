@@ -47,7 +47,8 @@ export default new Router({
       component: News
     },
     {
-      path: '/search?q=:text',
+      path: '/search',
+      // path: '/search/:text',
       name: 'search',
       component: Search
     },

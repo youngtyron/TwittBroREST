@@ -34,7 +34,6 @@
               password: this.password
             },
             success: (response)=>{
-              alert('Добро пожаловать!')
               sessionStorage.setItem('auth_token', response.data.attributes.auth_token)
               this.$router.push({name: 'mywall'})
             },

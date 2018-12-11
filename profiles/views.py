@@ -193,19 +193,53 @@ class SearchView(APIView):
 
     def get(self, request):
         text = request.GET.get('text')
-        #Поиск среди имен
-        # name_results = User.objects.filter(Q(first_name__icontains = text) | Q(last_name__icontains=text))
-        #Поиск среди текста постов
-        results = Post.objects.filter(text__icontains = text)
-        portion_res = results.values_list('pk', flat=True)[0:10]
-        results = Post.objects.filter(pk__in = portion_res)
-        serializer = PostSerializer(results, many=True)
-        i = 0
-        while i < results.count():
-            post = results.get(id = serializer.data[i]['id'])
-            if post.user_can_likes(request.user):
-                serializer.data[i].update({'red': False})
-            else:
-                serializer.data[i].update({'red': True})
-            i = i+1
-        return Response({"data": serializer.data})
+        type = request.GET.get('type')
+        if type == '1':
+            results = Post.objects.filter(text__icontains = text)
+            portion_res = results.values_list('pk', flat=True)[0:10]
+            results = Post.objects.filter(pk__in = portion_res)
+            serializer = PostSerializer(results, many=True)
+            i = 0
+            while i < results.count():
+                post = results.get(id = serializer.data[i]['id'])
+                if post.user_can_likes(request.user):
+                    serializer.data[i].update({'red': False})
+                else:
+                    serializer.data[i].update({'red': True})
+                i = i+1
+            return Response({"data": serializer.data})
+        elif type == '2':
+            name_results = User.objects.filter(Q(first_name__icontains = text) | Q(last_name__icontains=text))
+            portion_res = name_results.values_list('pk', flat=True)[0:10]
+            results = User.objects.filter(pk__in = portion_res)
+            serializer = UserSerializer(results, many=True)
+            return Response({"data": serializer.data})
+
+class AppendSearchView(APIView):
+
+    permission_classes = [permissions.IsAuthenticated, ]
+
+    def get(self, request):
+        type = request.GET.get('type')
+        last = request.GET.get('last')
+        question = request.GET.get('question')
+        if type == 'posts':
+            results = Post.objects.filter(text__icontains = question, id__lt = last)
+            portion_res = results.values_list('pk', flat=True)[0:10]
+            results = Post.objects.filter(pk__in = portion_res)
+            serializer = PostSerializer(results, many=True)
+            i = 0
+            while i < results.count():
+                post = results.get(id = serializer.data[i]['id'])
+                if post.user_can_likes(request.user):
+                    serializer.data[i].update({'red': False})
+                else:
+                    serializer.data[i].update({'red': True})
+                i = i+1
+            return Response({"data": serializer.data})
+        elif type == 'users':
+            name_results = User.objects.filter(Q(first_name__icontains = question, id__gt = last ) | Q(last_name__icontains=question, id__gt = last))
+            portion_res = name_results.values_list('pk', flat=True)[0:10]
+            results = User.objects.filter(pk__in = portion_res)
+            serializer = UserSerializer(results, many=True)
+            return Response({"data": serializer.data})

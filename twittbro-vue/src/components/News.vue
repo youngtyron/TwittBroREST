@@ -6,6 +6,7 @@
         <img class='avatar' alt=''/>
       </div>
       <div class='central-strip' v-for='post in posts' :value="post.id">
+        <p class='post-author'>{{post.author.first_name}} {{post.author.last_name}}</p>
         <p class='post-text'>{{post.text}}</p>
         <p>{{post.pub_date}}</p>
         <i v-if = 'post.red' class="fas fa-heart fa-2x liking-heart red-heart" @click='likePost'>{{post.likes_quanity}}</i>
@@ -151,5 +152,9 @@
   .avatar{
     width: 150px;
     border-radius: 100px;
+  }
+  .post-author{
+    font-size: 150%;
+    color: #039be5;
   }
 </style>

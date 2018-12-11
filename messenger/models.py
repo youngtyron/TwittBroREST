@@ -27,8 +27,13 @@ class Chat(models.Model):
         counter = 0
         for message in self.messages.all().filter(is_read = False):
             if message.is_grey_for_me(user):
-                counter =+ 1
+                counter =counter + 1
         return counter
+
+    def companions(self, user):
+        companions = self.members.all()
+        Companions = companions.exclude(id = user.id)
+        return Companions
 
 class Message(models.Model):
     writer = models.ForeignKey(User, on_delete = models.CASCADE, related_name = 'his_written_messages', verbose_name='Автор сообщения')
