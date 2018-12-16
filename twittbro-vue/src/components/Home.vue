@@ -1,8 +1,7 @@
 <template>
   <mu-container>
     <mu-appbar color='primary'  class="navbar">
-      <!-- <i v-if='auth' class="fas fa-search"></i>
-      <mu-text-field v-if='auth' color='indigo50' v-model="form.textarea" class = 'search-field' v-on:keyup.enter='submitSearch'></mu-text-field> -->
+
       TwittBro
 
       <mu-button flat slot='right' v-if='!auth' @click='goLogin'>Вход</mu-button>

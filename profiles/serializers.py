@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from profiles.models import Post, Profile
+from profiles.models import Post, Profile, Comment
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -12,10 +12,15 @@ class UserSerializer(serializers.ModelSerializer):
 
 class PostSerializer(serializers.ModelSerializer):
 
+    images_data = serializers.SerializerMethodField()
+
     class Meta:
         model = Post
-        fields = ('author', 'text', 'pub_date', 'id', 'likes_quanity')
+        fields = ('author', 'text', 'pub_date', 'id', 'likes_quanity', 'images_data')
         depth = 1
+
+    def get_images_data(self, obj):
+        return self.context.get('images_data')
 
 class ProfileSerializer(serializers.ModelSerializer):
 
@@ -23,4 +28,9 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ('rating', 'avatar')
 
-        # fields = ('rating', 'avatar', 'avatar_profile', 'avatar_mini', 'avatar_micro')
+class CommentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Comment
+        fields = '__all__'
+        depth = 1

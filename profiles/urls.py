@@ -16,4 +16,6 @@ urlpatterns = [
     path('avatar/<int:user_id>/', AvatarView.as_view()),
     path('avatarnews/', AvatarNewsView.as_view()),
     path('followings/', FollowingsView.as_view()),
+    path('change_avatar/', ChangeAvatarView.as_view()),
+    path('comments/', CommentView.as_view()),
 ]

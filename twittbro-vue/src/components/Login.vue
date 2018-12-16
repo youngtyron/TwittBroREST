@@ -53,6 +53,7 @@
 
 <style scoped>
   .blue-link{
-    color: blue;
+    font-size: 120%;
+    color: #039be5;
   }
 </style>
