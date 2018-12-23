@@ -18,4 +18,5 @@ urlpatterns = [
     path('followings/', FollowingsView.as_view()),
     path('change_avatar/', ChangeAvatarView.as_view()),
     path('comments/', CommentView.as_view()),
+    path('repost/', RepostView.as_view()),
 ]

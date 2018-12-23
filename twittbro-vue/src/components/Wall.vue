@@ -56,6 +56,7 @@
                   <mu-text-field v-model="form.textarea" placeholder="Отправьте новый пост"></mu-text-field>
                   <i class="fas fa-camera fa-2x" @click="openImagePostAddWindow"></i>
                   <mu-button round color="secondary" @click="newPost">Отправить</mu-button>
+                  <p class='text-hooked-images' v-if='this.count_hooked'>{{this.count_hooked}}</p>
                 </div>
 
                 <mu-dialog v-if='mywall' width="600" max-width="80%" :esc-press-close="false" :overlay-close="false" :open.sync="ImagePostAddWindow">
@@ -72,19 +73,64 @@
                     <mu-button slot="actions" flat color="secondary" @click="hookImages">Прикрепить</mu-button>
                 </mu-dialog>
 
-                <div class='central-strip' v-for='post in posts' :value="post.id">
+                <div class='central-strip' v-for='post in posts' :value="post.id" :name='post.id'>
+
+                  <p v-if='post.repost'>
+                    <img :src='post.repost.origin_ultra_ava' class='ultra-avatar' alt=''/>
+                    {{post.repost.origin_first_name}} {{post.repost.origin_last_name}}
+                  </p>
+
                   <i @click='deletePost' v-if='mywall' class="fas fa-times fa-2x deleting-cross" v-on:mouseover = 'darkCross' v-on:mouseout = 'lightCross'></i>
-                  <p class='post-text'>{{post.text}}</p>
+                  <p v-if='!post.repost' class='post-text'>{{post.text}}</p>
+                  <p v-else class='post-text'>{{post.repost.text}}</p>
+                  <p v-if='post.repost'>{{post.repost.pub_date}}</p>
                   <p>{{post.pub_date}}</p>
                   <div v-if='post.images_data'>
-                    <img class = 'post-image' v-for = 'image in post.images_data' :name='image.big' :src="image.small" alt="image" @click='showInGallery(image.big)'>
+                    <img class = 'one-image' v-for = 'image in post.images_data' :name='image.big' :src="image.small" alt="image" @click='showInGallery(image.big)'>
                   </div>
-                  <p v-if='post.comments' class="blue-link" @click='loadComments(post.id)'>Показать комментарии</p>
+                  <div v-if='post.repost'>
+                    <div v-if='post.repost.images_data'>
+                      <img class = 'one-image' v-for = 'image in post.repost.images_data' :name='image.big' :src="image.small" alt="image" @click='showInGallery(image.big)'>
+                    </div>
+                  </div>
+                  <p v-if='post.comments' class="blue-link show-comments" @click='loadComments(post)'>Показать комментарии</p>
+                  <p v-if='post.comments' class="blue-link hide-comments" @click='hideComments(post.id)'>Скрыть комментарии</p>
+                  <div class="comments-block">
+                    <div class="one-comment" v-for='comment in post.comments'>
+                      <img :src='comment.ultra_avatar' class='ultra-avatar' alt=''/>
+                      <p>{{comment.commentator.first_name}} {{comment.commentator.last_name}}</p>
+                      <p>{{comment.text}}</p>
+                      <div v-if='comment.images_data'>
+                        <img class = 'one-image' v-for = 'image in comment.images_data' :name='image.big' :src="image.small" alt="image" @click='showInGallery(image.big)'>
+                      </div>
+                    </div>
+                  </div>
+                  <p>
+                    <mu-text-field  :rows="2" multi-line width='50%' v-model="post.commentform.textarea" placeholder="Напечатайте свой комментарий"></mu-text-field>
+                    <i class="fas fa-camera fa-2x" @click="openImageCommentAddWindow(post.id)"></i>
+                    <i class="fas fa-chevron-right fa-2x" @click='addComment(post)'></i>
+                  </p>
 
 
-                  <i v-if = 'post.red' class="fas fa-heart fa-2x liking-heart red-heart" @click='likePost'>{{post.likes_quanity}}</i>
-                  <i v-else class="far fa-heart fa-2x liking-heart" @click='likePost'>{{post.likes_quanity}}</i>
+                    <i v-if = 'post.red' class="fas fa-heart fa-2x liking-heart red-heart" @click='likePost'>{{post.likes_quanity}}</i>
+                    <i v-else class="far fa-heart fa-2x liking-heart" @click='likePost'>{{post.likes_quanity}}</i>
+                    <i v-if='post.can_repost' @click='repost(post.id)' class="fas fa-share fa-2x"></i>
+
           </div>
+
+          <mu-dialog width="600" max-width="80%" :esc-press-close="false" :overlay-close="false" :open.sync="ImageCommentAddWindow">
+              <p style = 'font-size:120%;'>Добавьте изображения к вашему комментарию</p>
+              <span>Вы можете прикрепить до 10 изображений</span><br>
+
+            <form id="uploadCommentForm" name="uploadCommentForm" enctype="multipart/form-data">
+
+               <input type="file" id="commentimages" name="commentimages" multiple v-on:change='changeCommentImageInput'><br>
+
+            </form>
+
+              <mu-button slot="actions" flat color="primary" @click="closeImageCommentAddWindow">Отмена</mu-button>
+              <mu-button slot="actions" flat color="secondary" @click="hookCommentImages">Прикрепить</mu-button>
+          </mu-dialog>
 
           <GallerySlot v-if='this.$root.openGallerySlot'></GallerySlot>
 
@@ -111,7 +157,6 @@
 
       data() {
         return {
-          test: '',
           posts: '',
           form: {
             textarea: '',
@@ -126,10 +171,14 @@
           openChatsList: false,
           openAddAvatar: false,
           ImagePostAddWindow: false,
+          ImageCommentAddWindow: false,
           chats: '',
           selectedChat: '',
           image: '',
           hooked_FormData: '',
+          hooked_CommentFormData: '',
+          count_hooked: '',
+          post_for_imagecomment: '',
         }
       },
       created() {
@@ -142,20 +191,143 @@
            window.addEventListener('scroll', this.scrollToCounter);
       },
       methods: {
-        loadComments(id){
+        repost(id){
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/profiles/comments/',
-             type: "GET",
+             url: 'http://127.0.0.1:8000/api/profiles/repost/',
+             type: "POST",
              data: {
-                 post: id,
+                 id: id,
              },
              success: (response) => {
+               console.log('success')
 
              },
              error: (response)=> {
                alert('Ошибка. Повторите снова')
              }
           })
+        },
+        openImageCommentAddWindow(id){
+          this.ImageCommentAddWindow = true
+          this.post_for_imagecomment = id
+        },
+        hookCommentImages(){
+          this.hooked_CommentFormData = new FormData(document.getElementById('uploadCommentForm'))
+          this.ImageCommentAddWindow = false
+        },
+        closeImageCommentAddWindow(){
+          this.ImageCommentAddWindow = false
+        },
+        changeCommentImageInput(){
+          var input = document.getElementById('commentimages')
+          if (input.files.length>10){
+            input.value = ""
+            alert('Вы не можете отправлять более 10 изображений за раз. Добавьте изображения заново.')
+          }
+        },
+        addComment(post){
+          var text = post.commentform.textarea
+          if  (this.hooked_CommentFormData && this.post_for_imagecomment == post.id){
+            var s = this
+            const data = this.hooked_CommentFormData
+            data.append('text', text)
+            data.append('post', post.id)
+            axios.post('http://127.0.0.1:8000/api/profiles/comments/', data, {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': "Token " + sessionStorage.getItem('auth_token')
+              }
+            })
+              .then(response => {
+                post.commentform.textarea = ''
+                if (post.comments){
+                  if (post.comblock_isopen){
+                    post.comments = post.comments.concat(response.data.data.data)
+                  }
+                  else{
+                    this.loadComments(post)
+                  }
+                  var parent = document.getElementsByName(post.id)
+                  var comblock = $(parent).find('.comments-block')
+                  comblock.css('display', 'block')
+                  post['comblock_isopen'] = true
+                  this.post_for_imagecomment = ''
+                }
+                else{
+                  window.location.reload()
+                }
+              })
+              .catch(error => {
+                alert('Ошибка. Повторите снова')
+              })
+          }
+          else{
+            $.ajax({
+               url: 'http://127.0.0.1:8000/api/profiles/comments/',
+               type: "POST",
+               data: {
+                   post: post.id,
+                   text: text,
+               },
+               success: (response) => {
+                 post.commentform.textarea = ''
+                 if (response.data.empty){
+                   alert('Введите текст в поле ввода')
+                 }
+                 else{
+                   if (post.comments){
+                     if (post.comblock_isopen){
+                       post.comments = post.comments.concat(response.data.data)
+                     }
+                     else{
+                       this.loadComments(post)
+                     }
+                     var parent = document.getElementsByName(post.id)
+                     var comblock = $(parent).find('.comments-block')
+                     comblock.css('display', 'block')
+                     post['comblock_isopen'] = true
+                   }
+                   else{
+                     window.location.reload()
+                   }
+                 }
+               },
+               error: (response)=> {
+                 alert('Ошибка. Повторите снова')
+               }
+            })
+          }
+        },
+        hideComments(id){
+          var parent = document.getElementsByName(id)
+          var comblock = $(parent).find('.comments-block')
+          comblock.css('display', 'none')
+          $(parent).find('.show-comments').css('display', 'block')
+          $(parent).find('.hide-comments').css('display', 'none')
+          post['comblock_isopen'] = false
+        },
+        loadComments(post){
+          var parent = document.getElementsByName(post.id)
+          var comblock = $(parent).find('.comments-block')
+          comblock.css('display', 'block')
+          $(parent).find('.show-comments').css('display', 'none')
+          $(parent).find('.hide-comments').css('display', 'block')
+          if  (!post.comments.length){
+            $.ajax({
+               url: 'http://127.0.0.1:8000/api/profiles/comments/',
+               type: "GET",
+               data: {
+                   post: post.id,
+               },
+               success: (response) => {
+                 post['comments'] = response.data.data
+                 post['comblock_isopen'] = true
+               },
+               error: (response)=> {
+                 alert('Ошибка. Повторите снова')
+               }
+            })
+          }
         },
         showInGallery(url){
           this.$root.currentUrl = url
@@ -166,7 +338,6 @@
               this.$root.galleryUrls = this.$root.galleryUrls.concat(bros[i].getAttribute('name'))
           }
           this.$root.openGallerySlot = true
-
         },
         changeImageInput(){
           var input = document.getElementById('postimages')
@@ -178,6 +349,17 @@
         hookImages(){
           this.hooked_FormData = new FormData(document.getElementById('uploadPostForm'))
           this.ImagePostAddWindow = false
+          var input = document.getElementById('postimages')
+          console.log(input.files.length)
+          if (input.files.length == 1){
+            this.count_hooked = 'Прикреплено 1 изображение'
+          }
+          else if (input.files.length >1 && input.files.length < 5){
+            this.count_hooked = 'Прикреплено ' + String(input.files.length) + ' изображения'
+          }
+          else {
+            this.count_hooked = 'Прикреплено ' + String(input.files.length) + ' изображений'
+          }
         },
         closeImagePostAddWindow(){
           this.ImagePostAddWindow = false
@@ -343,6 +525,9 @@
                    else{
                      this.posts =  this.posts.concat(response.data.data)
                    }
+                   for (var i = 0; i<this.posts.length; ++i){
+                     this.posts[i]['commentform'] = {'textarea': ''}
+                   }
                    if (response.data.mywall){
                      this.mywall = true;
                    }
@@ -362,6 +547,7 @@
             })
               .then(response => {
                 this.form.textarea = ''
+                this.count_hooked = ''
                 if (this.posts != ''){
                   this.posts = this.posts.concat(response.data.data.data)
                   this.posts.unshift(this.posts[this.posts.length - 1])
@@ -369,6 +555,9 @@
                 }
                 else{
                   this.posts = response.data.data.data
+                }
+                for (var i = 0; i<this.posts.length; ++i){
+                  this.posts[i]['commentform'] = {'textarea': ''}
                 }
               })
               .catch(error => {
@@ -397,15 +586,13 @@
                 else{
                   this.posts = response.data.data
                 }
+                for (var i = 0; i<this.posts.length; ++i){
+                  this.posts[i]['commentform'] = {'textarea': ''}
+                }
                 }
               },
             })
           }
-
-
-
-
-
         },
         deletePost(event){
           var id = event.target.parentNode.getAttribute('value')
@@ -500,12 +687,32 @@
     width: 100%;
     height: 30px;
   }
-  .post-image{
+  .one-image{
     margin-left: 3px;
     margin-right: 3px;
   }
   .blue-link{
     font-size: 120%;
     color: #039be5;
+  }
+  .comments-block{
+    display: none;
+  }
+  .hide-comments{
+    display: none;
+  }
+  .text-hooked-images{
+    margin-right: 175px;
+    margin-top: -10px;
+    color: #039be5;
+  }
+  .ultra-avatar{
+    width: 35px;
+    height: 35px;
+    border-radius: 35px;
+  }
+  .fa-share{
+    float: left;
+    margin-left: 10px;
   }
 </style>

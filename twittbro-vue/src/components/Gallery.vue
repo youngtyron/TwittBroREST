@@ -47,7 +47,7 @@
         },
         closeListener(e){
           var div = $("#gallery-div"); // тут указываем ID элемента
-          var image = $('.post-image');
+          var image = $('.one-image');
       		if (!div.is(e.target) // если клик был не по нашему блоку
       		    && div.has(e.target).length === 0
               && !image.is(e.target)) { // и не по его дочерним элементам

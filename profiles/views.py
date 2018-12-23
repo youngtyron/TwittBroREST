@@ -4,11 +4,24 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
 from django.contrib.auth.models import User
-from profiles.models import Post, Like, Following, Profile, ImagePost, Comment
+from profiles.models import Post, Like, Following, Profile, ImagePost, Comment, ImageComment
 from profiles.serializers import PostSerializer, UserSerializer, ProfileSerializer, CommentSerializer
 from twittbro.myfunctions import its_empty_string
 from django.shortcuts import get_object_or_404
 
+
+class RepostView(APIView):
+
+    permission_classes = [permissions.IsAuthenticated, ]
+
+    def post(self, request):
+        print(request.POST)
+        post = Post.objects.get(id = request.POST.get('id'))
+        if post.can_repost(request.user):
+            repost = Post.objects.create(author = request.user, repost = post)
+        else:
+            return Response(status = 400)
+        return Response(status=201)
 
 class ChangeAvatarView(APIView):
 
@@ -50,6 +63,11 @@ class NewsView(APIView):
                 serializer.data[i].update({'red': False})
             else:
                 serializer.data[i].update({'red': True})
+            serializer.data[i].update({'can_repost': post.can_repost(request.user)})
+            if post.repost:
+                serializer.data[i]['repost'].update({'images_data': post.repost.images_urls(), 'origin_ultra_ava' : post.repost.author.profile.ultra_avatar_url(),
+                                                    'origin_first_name': post.repost.author.first_name, 'origin_last_name': post.repost.author.last_name,
+                                                    'origin_id': post.repost.author.id})
             i = i+1
         return Response({"data": serializer.data})
 
@@ -152,21 +170,11 @@ class PostsView(APIView):
             else:
                 serializer.data[i].update({'red': True})
             serializer.data[i].update({'images_data': post.images_urls()})
-            # comments = post.comments_to_this_post.all()
-            # if comments.exists():
-            #     all_comment_data = {}
-            #     c = 0
-            #     while c< len(comments):
-            #         comment = comments[c]
-            #         comment_data = {'commentator': {'first_name': comment.commentator.first_name, 'last_name': comment.commentator.last_name, 'id': comment.commentator.id},
-            #                         'text': comment.text, 'id': comment.id, 'com_date': comment.com_date}
-            #         if comment.answer_to:
-            #             comment_data.update({'answer_to': comment.answer_to.id})
-            #         all_comment_data.update({c: comment_data})
-            #         c = c+ 1
-            #     serializer.data[i].update({'comments': all_comment_data})
-            # else:
-            #     serializer.data[i].update({'comments': None})
+            serializer.data[i].update({'can_repost': post.can_repost(request.user)})
+            if post.repost:
+                serializer.data[i]['repost'].update({'images_data': post.repost.images_urls(), 'origin_ultra_ava' : post.repost.author.profile.ultra_avatar_url(),
+                                                    'origin_first_name': post.repost.author.first_name, 'origin_last_name': post.repost.author.last_name,
+                                                    'origin_id': post.repost.author.id})
             if post.is_commented():
                 serializer.data[i].update({'comments': True})
             i = i+1
@@ -215,11 +223,39 @@ class CommentView(APIView):
 
     def get(self, request):
         post = Post.objects.get(id = request.GET.get('post'))
-        print(post)
         comments = post.comments_to_this_post.all()
         serializer = CommentSerializer(comments, many=True)
         return Response({"data": serializer.data})
-        # return Response(status=201)
+
+    def post(self, request):
+        post = Post.objects.get(id = request.POST.get('post'))
+        text = request.POST.get('text')
+        images = request.FILES.getlist('commentimages')
+        if images:
+            comment = Comment.objects.create(commentator=request.user, post=post)
+            for image in images:
+                imagepost = ImageComment.objects.create(comment = comment, image = image)
+            if text:
+                if not its_empty_string(text):
+                    comment.text = text
+                    comment.save()
+                    serializer = CommentSerializer(comment, context={'images_data': comment.images_urls()})
+                    return Response({"data": serializer.data})
+            else:
+                serializer = CommentSerializer(comment, context={'images_data': comment.images_urls()})
+                return Response({"data": serializer.data})
+        else:
+            if text:
+                if its_empty_string(text):
+                     return Response(status=201, data={'empty':True})
+                else:
+                    comment = Comment.objects.create(commentator=request.user, post=post)
+                    comment.text = text
+                    comment.save()
+                    serializer = CommentSerializer(comment)
+                    return Response({"data": serializer.data})
+            else:
+                return Response(status=201, data={'empty':True})
 
 
 class DeletePostView(APIView):
