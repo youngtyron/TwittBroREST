@@ -1,8 +1,8 @@
 <template>
   <HomeSlot>
     <div>
-      <input v-model='login' type='text' placeholder="Логин"/>
-      <input v-model='password' type='password' placeholder="Пароль"/>
+      <mu-text-field v-model="login" placeholder="Логин"></mu-text-field></br>
+      <mu-text-field v-model="password" type='password' placeholder="Пароль"></mu-text-field></br>
       <button @click='setLogin'>Войти</button>
       <p class='blue-link' @click='goRegistrate'>Зарегистрироваться</p>
     </div>
@@ -22,7 +22,11 @@
         return {
           login: '',
           password: '',
+          visibility: false,
         }
+      },
+      created(){
+        window.addEventListener('keypress', this.keyEnterListener);
       },
       methods: {
         setLogin(){
@@ -46,6 +50,16 @@
         },
         goRegistrate() {
           this.$router.push({name: "registration"})
+        },
+        keyEnterListener(event){
+          if (event.keyCode == 13){
+            if (this.login && this.password){
+              this.setLogin()
+            }
+          }
+          else{
+            return null
+          }
         },
       },
     }

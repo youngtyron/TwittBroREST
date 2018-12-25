@@ -15,13 +15,16 @@ class RepostView(APIView):
     permission_classes = [permissions.IsAuthenticated, ]
 
     def post(self, request):
-        print(request.POST)
         post = Post.objects.get(id = request.POST.get('id'))
         if post.can_repost(request.user):
-            repost = Post.objects.create(author = request.user, repost = post)
+            repost = Post.objects.create(author = request.user, repost = post, is_repost = True)
+            serializer = PostSerializer(repost)
+            serializer.data['repost'].update({'images_data': repost.repost.images_urls(), 'origin_ultra_ava' : repost.repost.author.profile.ultra_avatar_url(),
+                                                'origin_first_name': repost.repost.author.first_name, 'origin_last_name': repost.repost.author.last_name,
+                                                'origin_id': repost.repost.author.id, 'pub_date': repost.repost.pub_date.date()})
+            return Response({"data": serializer.data})
         else:
             return Response(status = 400)
-        return Response(status=201)
 
 class ChangeAvatarView(APIView):
 
@@ -67,7 +70,7 @@ class NewsView(APIView):
             if post.repost:
                 serializer.data[i]['repost'].update({'images_data': post.repost.images_urls(), 'origin_ultra_ava' : post.repost.author.profile.ultra_avatar_url(),
                                                     'origin_first_name': post.repost.author.first_name, 'origin_last_name': post.repost.author.last_name,
-                                                    'origin_id': post.repost.author.id})
+                                                    'origin_id': post.repost.author.id, 'pub_date': post.repost.pub_date.date()})
             i = i+1
         return Response({"data": serializer.data})
 
@@ -174,7 +177,7 @@ class PostsView(APIView):
             if post.repost:
                 serializer.data[i]['repost'].update({'images_data': post.repost.images_urls(), 'origin_ultra_ava' : post.repost.author.profile.ultra_avatar_url(),
                                                     'origin_first_name': post.repost.author.first_name, 'origin_last_name': post.repost.author.last_name,
-                                                    'origin_id': post.repost.author.id})
+                                                    'origin_id': post.repost.author.id, 'pub_date': post.repost.pub_date.date()})
             if post.is_commented():
                 serializer.data[i].update({'comments': True})
             i = i+1

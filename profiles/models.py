@@ -53,6 +53,7 @@ class Post(models.Model):
     pub_date = models.DateTimeField("Дата отправки", auto_now_add=True)
     likes_quanity = models.IntegerField(default = 0)
     repost = models.ForeignKey('Post', verbose_name="Репост", on_delete = models.SET_NULL, related_name = 'reposts', null = True, blank = True)
+    is_repost = models.BooleanField(default = False, verbose_name='Является репостом')
 
     class Meta:
         ordering = ['-pub_date']
@@ -97,16 +98,23 @@ class Post(models.Model):
             return None
 
     def can_repost(self, user):
-        if self.repost:
-            if self.repost.author == user or self.author ==user:
+        if self.is_repost:
+            if not self.repost:
                 return False
             else:
-                return True
+                if self.repost.author == user or self.author ==user:
+                    return False
+                else:
+                    return True
         else:
             if self.author == user:
                 return False
             else:
-                return True
+                repost = Post.objects.filter(author = user, repost = self)
+                if repost.exists():
+                    return False
+                else:
+                    return True
 
 
 class ImagePost(models.Model):

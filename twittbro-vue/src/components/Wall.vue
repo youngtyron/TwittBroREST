@@ -75,24 +75,29 @@
 
                 <div class='central-strip' v-for='post in posts' :value="post.id" :name='post.id'>
 
-                  <p v-if='post.repost'>
-                    <img :src='post.repost.origin_ultra_ava' class='ultra-avatar' alt=''/>
-                    {{post.repost.origin_first_name}} {{post.repost.origin_last_name}}
-                  </p>
-
                   <i @click='deletePost' v-if='mywall' class="fas fa-times fa-2x deleting-cross" v-on:mouseover = 'darkCross' v-on:mouseout = 'lightCross'></i>
-                  <p v-if='!post.repost' class='post-text'>{{post.text}}</p>
-                  <p v-else class='post-text'>{{post.repost.text}}</p>
-                  <p v-if='post.repost'>{{post.repost.pub_date}}</p>
-                  <p>{{post.pub_date}}</p>
+
+                  <p class='post-text'>{{post.text}}</p>
                   <div v-if='post.images_data'>
                     <img class = 'one-image' v-for = 'image in post.images_data' :name='image.big' :src="image.small" alt="image" @click='showInGallery(image.big)'>
                   </div>
-                  <div v-if='post.repost'>
-                    <div v-if='post.repost.images_data'>
-                      <img class = 'one-image' v-for = 'image in post.repost.images_data' :name='image.big' :src="image.small" alt="image" @click='showInGallery(image.big)'>
+
+                  <div v-if='post.is_repost' class="repost-block">
+                    <div v-if='post.repost'>
+                      <img :src='post.repost.origin_ultra_ava' class='ultra-avatar' alt=''/>
+                      {{post.repost.origin_first_name}} {{post.repost.origin_last_name}}
+                      <p class='post-text'>{{post.repost.text}}</p>
+                      <div v-if='post.repost.images_data'>
+                        <img class = 'one-image' v-for = 'image in post.repost.images_data' :name='image.big' :src="image.small" alt="image" @click='showInGallery(image.big)'>
+                      </div>
+                      <p>{{post.repost.pub_date}}</p>
+                    </div>
+                    <div v-else>
+                      <p>Пост был удален</p>
                     </div>
                   </div>
+                  <p>{{post.pub_date}}</p>
+
                   <p v-if='post.comments' class="blue-link show-comments" @click='loadComments(post)'>Показать комментарии</p>
                   <p v-if='post.comments' class="blue-link hide-comments" @click='hideComments(post.id)'>Скрыть комментарии</p>
                   <div class="comments-block">

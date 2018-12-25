@@ -14,13 +14,13 @@ class PostSerializer(serializers.ModelSerializer):
 
     images_data = serializers.SerializerMethodField()
     small_ava = serializers.SerializerMethodField()
-#    ultra_ava = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField()
     can_repost = serializers.SerializerMethodField()
+    pub_date = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = ('author', 'text', 'pub_date', 'id', 'likes_quanity', 'images_data', 'small_ava', 'comments', 'can_repost', 'repost')#, 'ultra_ava')
+        fields = ('author', 'text', 'id', 'likes_quanity', 'small_ava', 'comments', 'can_repost', 'repost', 'is_repost', 'images_data', 'pub_date')
         depth = 1
 
     def get_images_data(self, obj):
@@ -28,9 +28,6 @@ class PostSerializer(serializers.ModelSerializer):
 
     def get_small_ava(self, obj):
         return obj.author.profile.small_avatar_url()
-
-    # def get_ultra_ava(self, obj):
-    #     return obj.author.profile.ultra_avatar_url()
 
     def get_comments(self, obj):
         if obj.is_commented():
@@ -40,6 +37,9 @@ class PostSerializer(serializers.ModelSerializer):
 
     def get_can_repost(self, obj):
         return self.context.get('can_repost')
+
+    def get_pub_date(self, obj):
+        return obj.pub_date.date()
 
 class ProfileSerializer(serializers.ModelSerializer):
 

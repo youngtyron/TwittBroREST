@@ -8,22 +8,28 @@
       <div class='central-strip' v-for='post in posts' :value="post.id" :name='post.id'>
         <img :src='post.small_ava' class='small-avatar' alt=''/>
         <p @click='userLink(post.author.id)' class='post-author'>{{post.author.first_name}} {{post.author.last_name}}</p>
-        <p v-if='post.repost'>
-          <img :src='post.repost.origin_ultra_ava' class='ultra-avatar' alt=''/>
-          POST AUTHOR: {{post.repost.origin_first_name}} {{post.repost.origin_last_name}}
-        </p>
-        <p v-if='!post.repost' class='post-text'>{{post.text}}</p>
-        <p v-else class='post-text'>{{post.repost.text}}</p>
-        <p v-if='post.repost'>{{post.repost.pub_date}}</p>
-        <p>{{post.pub_date}}</p>
+
+        <p class='post-text'>{{post.text}}</p>
         <div v-if='post.images_data'>
           <img class = 'one-image' v-for = 'image in post.images_data' :name='image.big' :src="image.small" alt="image" @click='showInGallery(image.big)'>
         </div>
-        <div v-if='post.repost'>
-          <div v-if='post.repost.images_data'>
-            <img class = 'one-image' v-for = 'image in post.repost.images_data' :name='image.big' :src="image.small" alt="image" @click='showInGallery(image.big)'>
+
+        <div v-if='post.is_repost' class="repost-block">
+          <div v-if='post.repost'>
+            <img :src='post.repost.origin_ultra_ava' class='ultra-avatar' alt=''/>
+            {{post.repost.origin_first_name}} {{post.repost.origin_last_name}}
+            <p class='post-text'>{{post.repost.text}}</p>
+            <div v-if='post.repost.images_data'>
+              <img class = 'one-image' v-for = 'image in post.repost.images_data' :name='image.big' :src="image.small" alt="image" @click='showInGallery(image.big)'>
+            </div>
+            <p>{{post.repost.pub_date}}</p>
+          </div>
+          <div v-else>
+            <p>Пост был удален</p>
           </div>
         </div>
+        <p>{{post.pub_date}}</p>
+
         <p v-if='post.comments' class="blue-link show-comments" @click='loadComments(post)'>Показать комментарии</p>
         <p v-if='post.comments' class="blue-link hide-comments" @click='hideComments(post.id)'>Скрыть комментарии</p>
         <div class="comments-block">
@@ -39,10 +45,11 @@
         <p>
           <mu-text-field  :rows="2" multi-line width='50%' v-model="post.commentform.textarea" placeholder="Напечатайте свой комментарий"></mu-text-field>
           <i class="fas fa-camera fa-2x" @click="openImageCommentAddWindow(post.id)"></i>
-          <i class="fas fa-share fa-2x" @click='addComment(post)'></i>
+          <i class="fas fa-chevron-right fa-2x" @click='addComment(post)'></i>
         </p>
         <i v-if = 'post.red' class="fas fa-heart fa-2x liking-heart red-heart" @click='likePost'>{{post.likes_quanity}}</i>
         <i v-else class="far fa-heart fa-2x liking-heart" @click='likePost'>{{post.likes_quanity}}</i>
+        <i v-if='post.can_repost' @click='repost(post.id)' class="fas fa-share fa-2x"></i>
       </div>
 
       <mu-dialog width="600" max-width="80%" :esc-press-close="false" :overlay-close="false" :open.sync="ImageCommentAddWindow">
@@ -102,6 +109,26 @@
            window.addEventListener('scroll', this.scrollToCounter);
       },
       methods: {
+        repost(id){
+          $.ajax({
+             url: 'http://127.0.0.1:8000/api/profiles/repost/',
+             type: "POST",
+             data: {
+                 id: id,
+             },
+             success: (response) => {
+               this.posts = this.posts.concat(response.data.data)
+               this.posts.unshift(this.posts[this.posts.length - 1])
+               this.posts.splice(- 1, 1)
+               this.posts[0]['commentform'] = {'textarea': ''}
+               alert('Пост процитирован на вашей странице')
+
+             },
+             error: (response)=> {
+               alert('Ошибка. Повторите снова')
+             }
+          })
+        },
         userLink(id){
           this.$router.push({name: 'wall', params: {id: id}})
         },
@@ -343,7 +370,7 @@
     color: #039be5;
   }
   .central-strip{
-    border: 1px solid #C1C1C1;
+    /* border: 1px solid #C1C1C1; */
 
     width: 60%;
     margin: auto;
@@ -380,5 +407,9 @@
     width: 35px;
     height: 35px;
     border-radius: 35px;
+  }
+  .fa-share{
+    float: left;
+    margin-left: 10px;
   }
 </style>
