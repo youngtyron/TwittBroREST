@@ -53,7 +53,7 @@
                   </div>
                 </div>
                 <div v-if='mywall'>
-                  <mu-text-field v-model="form.textarea" placeholder="Отправьте новый пост"></mu-text-field>
+                  <mu-text-field id='post-input' v-model="form.textarea" placeholder="Отправьте новый пост"></mu-text-field>
                   <i class="fas fa-camera fa-2x" @click="openImagePostAddWindow"></i>
                   <mu-button round color="secondary" @click="newPost">Отправить</mu-button>
                   <p class='text-hooked-images' v-if='this.count_hooked'>{{this.count_hooked}}</p>
@@ -194,8 +194,19 @@
            this.getAva();
            this.loadPosts();
            window.addEventListener('scroll', this.scrollToCounter);
+           window.addEventListener('keypress', this.keyPosterListener);
       },
       methods: {
+        keyPosterListener(event){
+          if (event.keyCode == 13){
+            if (document.activeElement == document.getElementById('post-input')){
+              this.newPost()
+            }
+          }
+          else{
+            return null
+          }
+        },
         repost(id){
           $.ajax({
              url: 'http://127.0.0.1:8000/api/profiles/repost/',

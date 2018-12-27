@@ -1,9 +1,10 @@
 <template>
   <HomeSlot>
-    <div>
-      <mu-text-field v-model="login" placeholder="Логин"></mu-text-field></br>
-      <mu-text-field v-model="password" type='password' placeholder="Пароль"></mu-text-field></br>
-      <button @click='setLogin'>Войти</button>
+    <div class="login-block">
+      <mu-text-field id='login-input' v-model="login" placeholder="Логин"></mu-text-field></br>
+      <mu-text-field id='password-input' v-model="password" type='password' placeholder="Пароль"></mu-text-field></br>
+      <!-- <button @click='setLogin'>Войти</button> -->
+      <mu-button color="primary" @click="setLogin">Войти</mu-button>
       <p class='blue-link' @click='goRegistrate'>Зарегистрироваться</p>
     </div>
   </HomeSlot>
@@ -43,6 +44,8 @@
             },
             error:(response)=>{
               if (response.status === 400){
+                this.login = ''
+                this.password = ''
                 alert("Логин или пароль не верен")
               }
             }
@@ -55,6 +58,12 @@
           if (event.keyCode == 13){
             if (this.login && this.password){
               this.setLogin()
+            }
+            else if (this.login){
+              document.getElementById('password-input').focus()
+            }
+            else if (this.password){
+              document.getElementById('login-input').focus()
             }
           }
           else{
@@ -69,5 +78,8 @@
   .blue-link{
     font-size: 120%;
     color: #039be5;
+  }
+  .login-block{
+    margin-top: 25px;
   }
 </style>

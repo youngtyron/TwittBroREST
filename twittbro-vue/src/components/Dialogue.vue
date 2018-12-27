@@ -63,7 +63,7 @@
           </div>
 
           <div class='print-block'>
-            <mu-text-field  v-model="form.textarea" placeholder="Отправьте новое сообщение"></mu-text-field>
+            <mu-text-field id='message-input' v-model="form.textarea" placeholder="Отправьте новое сообщение"></mu-text-field>
             <mu-button round color="secondary" @click="sendMessage">Отправить</mu-button>
           </div>
 
@@ -101,12 +101,23 @@
            this.loadMyUser();
            this.getAva();
            this.loadMessages();
+           window.addEventListener('keypress', this.keyWriteListener);
            setInterval(() => {
              this.newMessages()
            }, 10000)
 
       },
       methods: {
+        keyWriteListener(event){
+          if (event.keyCode == 13){
+            if (document.activeElement == document.getElementById('message-input')){
+              this.sendMessage()
+            }
+          }
+          else{
+            return null
+          }
+        },
         companionLink(id){
           this.$router.push({name: 'wall', params: {id: id}})
         },
@@ -158,7 +169,6 @@
             this.loadMessages()
           }
         },
-
         loadMessages(){
           if (this.messages.length == 0){
             var last = 0
@@ -203,7 +213,6 @@
                 alert('Введите текст в поле ввода')
               }
               else{
-                console.log(response.data.data)
                 this.messages = this.messages.concat(response.data.data)
               }
             },

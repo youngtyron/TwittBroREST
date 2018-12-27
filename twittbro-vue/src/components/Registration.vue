@@ -1,20 +1,42 @@
 <template>
-  <div>
-    <input v-model='username' type='text' placeholder="Логин"/>
-    <input v-model='first_name' type='text' placeholder="Имя"/>
-    <input v-model='last_name' type='text' placeholder="Фамилия"/>
-    <input v-model='email' type='text' placeholder="Электронная почта"/>
-    <input v-model='password' type='password' placeholder="Пароль"/>
-    <input v-model='confirm_password' type='password' placeholder="Подтверждение пароля"/>
-    <button @click='registrateUser'>Отправить</button>
-    <p class='blue-link' @click='goLogin'>Уже зарегистрированы?</p>
-  </div>
+  <HomeSlot>
+    <div class='register-block'>
+      <!-- <input v-model='username' type='text' placeholder="Логин"/> -->
+      <mu-text-field v-model="username" placeholder="Логин"></mu-text-field>
+      </br>
+      <!-- <input v-model='first_name' type='text' placeholder="Имя"/> -->
+      <mu-text-field v-model="first_name" placeholder="Имя"></mu-text-field>
+      </br>
+      <!-- <input v-model='last_name' type='text' placeholder="Фамилия"/> -->
+      <mu-text-field v-model="last_name" placeholder="Фамилия"></mu-text-field>
+      </br>
+      <!-- <input v-model='email' type='text' placeholder="Электронная почта"/> -->
+      <mu-text-field v-model="email" type="email" placeholder="Электронная почта"></mu-text-field>
+      </br>
+      <!-- <input v-model='password' type='password' placeholder="Пароль"/> -->
+      <mu-text-field v-model="password" type='password' placeholder="Пароль"></mu-text-field>
+      </br>
+      <!-- <input v-model='confirm_password' type='password' placeholder="Подтверждение пароля"/> -->
+      <mu-text-field v-model="confirm_password" type='password' placeholder="Подтверждение пароля"></mu-text-field>
+      </br>
+      <mu-button color="primary" @click="registrateUser">Отправить</mu-button>
+      <!-- <button @click='registrateUser'>Отправить</button> -->
+      </br>
+      <p class='blue-link' @click='goLogin'>Уже зарегистрированы?</p>
+    </div>
+  </HomeSlot>
 </template>
 
 <script>
 
+import HomeSlot from '@/components/Home.vue'
+
+
     export default{
       name: 'Registration',
+      components: {
+        HomeSlot,
+      },
       data() {
         return {
           username: '',
@@ -40,11 +62,12 @@
             },
             success: (response)=>{
               alert("Вы успешно зарегистрированы!")
-              this.$router.push({name: 'home'})
+              this.$router.push({name: 'login'})
             },
             error:(response)=>{
               if (response.status === 400){
-                if (response.data = 'pass_error'){
+                console.log('400')
+                if (response.data == 'pass_error'){
                   alert("Подтверждение пароля не совпадает")
                 }
                 else {
@@ -63,6 +86,10 @@
 
 <style scoped>
   .blue-link{
-    color: blue;
+    font-size: 120%;
+    color: #039be5;
+  }
+  .register-block{
+    margin-top: 25px;
   }
 </style>
