@@ -12,7 +12,8 @@
       <mu-button flat color="primary" @click="goToNews">Новости</mu-button>
       <mu-button flat color="primary" @click="goToMyWall">Моя страница</mu-button>
       <mu-button flat color="primary" @click="goToFollows">Мои подписки</mu-button>
-      <mu-button flat color="primary" @click="goToMessenger">Мои сообщения<mu-badge v-if='unread' v-bind:content='String(unread)' circle color="secondary"  class="demo-icon-badge"></mu-badge></mu-button>
+      <!-- <mu-button flat color="primary" @click="goToMessenger">Мои сообщения<mu-badge v-if='unread' v-bind:content='String(unread)' circle color="secondary"  class="demo-icon-badge"></mu-badge></mu-button> -->
+      <mu-button flat color="primary" @click="goToMessenger">Мои сообщения<mu-badge v-if='this.$root.unreadPinkMessages' v-bind:content='this.$root.unreadPinkMessages' circle color="secondary"  class="demo-icon-badge"></mu-badge></mu-button>
       <mu-button flat color="primary" @click="goToSearch">Поиск</mu-button>
 
     </mu-bottom-nav>
@@ -21,7 +22,6 @@
 </template>
 
 <script>
-
 
   export default {
     name: 'Home',
@@ -38,11 +38,13 @@
       }
     },
     mounted(){
-      this.newUnread()
+      // this.newUnread()
+      this.$root.pinkMessagesFunc()
     },
     created(){
       setInterval(() => {
-        this.newUnread()
+        // this.newUnread()
+        this.$root.pinkMessagesFunc()
       }, 25000)
     },
     methods:{
@@ -53,15 +55,15 @@
         sessionStorage.removeItem('auth_token')
         window.location = '/'
       },
-      newUnread(){
-        $.ajax({
-           url: 'http://127.0.0.1:8000/api/messenger/unread/',
-           type: "GET",
-           success: (response) => {
-               this.unread =  response.data.data
-             }
-        })
-      },
+      // newUnread(){
+      //   $.ajax({
+      //      url: 'http://127.0.0.1:8000/api/messenger/unread/',
+      //      type: "GET",
+      //      success: (response) => {
+      //          this.unread =  response.data.data
+      //        }
+      //   })
+      // },
       goToSearch(){
         this.$router.push({name: 'search'})
         // , params: {text: ''}

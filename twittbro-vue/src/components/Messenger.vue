@@ -18,7 +18,7 @@
           <mu-button style='margin-top:10px;'round color="secondary" @click='openNewChatWindow'>Создать чат</mu-button>
 
           <mu-dialog width="600" max-width="80%" :esc-press-close="false" :overlay-close="false" :open.sync="openNewChat">
-            <p>Выберите пользователя</p>
+            <p>Выберите пользователей</p>
             <select multiple="true" v-model="selectedUser" class="select-user">
                 <option v-for="p in people" v-bind:value="p.id">
                   {{p.first_name}} {{p.last_name}}
@@ -69,6 +69,7 @@
              type: "POST",
              success: (response) => {
                 alert('Чат создан')
+                this.openNewChat = false
               },
              error: (response) => {
                alert('Ошибка. Повторите снова')

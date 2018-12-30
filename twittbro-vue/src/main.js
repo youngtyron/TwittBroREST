@@ -15,6 +15,23 @@ new Vue({
     galleryUrls: '',
     currentUrl: '',
     openGallerySlot: false,
+    unreadPinkMessages: '',
+  },
+  methods:{
+    pinkMessagesFunc(){
+      $.ajax({
+         url: 'http://127.0.0.1:8000/api/messenger/unread/',
+         type: "GET",
+         success: (response) => {
+             if (response.data.data != 0){
+               this.$root.unreadPinkMessages =  String(response.data.data)
+             }
+             else {
+               this.$root.unreadPinkMessages = ''
+             }
+           }
+      })
+    },
   },
   router,
   components: { App },

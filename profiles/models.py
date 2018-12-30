@@ -47,6 +47,14 @@ class Profile(models.Model):
         else:
             return '/static/static/images/avatar.jpeg'
 
+    def home_unread_messages(self):
+        user = self.user
+        unread = 0
+        chats = user.chats.all()
+        for chat in chats:
+            unread = unread + chat.count_new_messages(user)
+        return unread
+
 class Post(models.Model):
     author = models.ForeignKey(User, verbose_name="Автор", on_delete = models.CASCADE)
     text = models.CharField(max_length = 400, null = True, blank = True, verbose_name="Текст")

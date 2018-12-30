@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
 from django.contrib.auth.models import User
-from messenger.models import Chat, Message
+from messenger.models import Chat, Message, ImageMessage
 from messenger.serializers import ChatSerializer, MessagesSerializer
 from twittbro.myfunctions import its_empty_string
 from profiles.serializers import UserSerializer
@@ -67,10 +67,11 @@ class NewUnreadView(APIView):
     permission_classes = [permissions.IsAuthenticated, ]
 
     def get(self, request):
-        chats = request.user.chats.all()
-        counter = 0
-        for chat in chats:
-            counter = counter + chat.count_new_messages(request.user)
+        # chats = request.user.chats.all()
+        # counter = 0
+        # for chat in chats:
+        #     counter = counter + chat.count_new_messages(request.user)
+        counter = request.user.profile.home_unread_messages()
         return Response({'data': counter})
 
 class WriteMessageView(APIView):
@@ -104,9 +105,10 @@ class NewMessagesView(APIView):
 
     permission_classes = [permissions.IsAuthenticated, ]
 
-    def get(self, request, chat_id):
+    def get(self, request):
         newest = request.GET.get('newest')
-        chat = Chat.objects.get(id = chat_id)
+        id = request.GET.get('id')
+        chat = Chat.objects.get(id = id)
         if chat in request.user.chats.all():
             messages = chat.query_newer_messages(newest)
             if messages.exists():
@@ -189,13 +191,28 @@ class DialogueView(APIView):
         chat = Chat.objects.get(id = chat_id)
         if chat in request.user.chats.all():
             text = request.POST.get('text')
-            if its_empty_string(text):
-                return Response(status=201, data={'empty':True})
+            images = request.FILES.getlist('messageimages')
+            if images:
+                message = Message.objects.create(writer = request.user, chat=chat)
+                for image in images:
+                    imagemessage = ImageMessage.objects.create(message = message, image = image)
+                if text:
+                    if not its_empty_string(text):
+                        message.text = text
+                        message.save()
+                        serializer = MessagesSerializer(message)
+                        return Response({"data": serializer.data})
+                else:
+                    serializer = MessagesSerializer(message)
+                    return Response({"data": serializer.data})
             else:
-                message = Message.objects.create(writer = request.user, text=text, chat=chat)
-                message.who_read.add(request.user)
-                message.save()
-                serializer = MessagesSerializer(message, context={'grey': True})
-                return Response({"data": serializer.data})
+                if its_empty_string(text):
+                    return Response(status=201, data={'empty':True})
+                else:
+                    message = Message.objects.create(writer = request.user, text=text, chat=chat)
+                    message.who_read.add(request.user)
+                    message.save()
+                    serializer = MessagesSerializer(message, context={'grey': True})
+                    return Response({"data": serializer.data})
         else:
             return Response(status=400)

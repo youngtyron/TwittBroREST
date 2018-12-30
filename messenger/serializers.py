@@ -23,12 +23,13 @@ class ChatSerializer(serializers.ModelSerializer):
 
 class MessagesSerializer(serializers.ModelSerializer):
 
+    images_data = serializers.SerializerMethodField()
     grey = serializers.SerializerMethodField()
     my_grey = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
-        fields = ('writer', 'text', 'pub_date', 'is_read', 'who_read', 'id', 'chat', 'grey', 'my_grey')
+        fields = ('writer', 'text', 'pub_date', 'is_read', 'who_read', 'id', 'chat', 'grey', 'my_grey', 'images_data')
         depth = 1
 
     def get_grey(self, obj):
@@ -36,3 +37,6 @@ class MessagesSerializer(serializers.ModelSerializer):
 
     def get_my_grey(self, obj):
         return self.context.get('my_grey')
+
+    def get_images_data(self, obj):
+        return obj.images_urls()

@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+import PIL
+from PIL import Image
+from imagekit.models.fields import ImageSpecField
+from imagekit.processors import ResizeToFit, Adjust, ResizeToFill
 # Create your models here.
 
 class Chat(models.Model):
@@ -73,3 +76,26 @@ class Message(models.Model):
             self.is_read = True
             self.save()
             return
+
+    def images_urls(self):
+        images_urls = []
+        images = ImageMessage.objects.filter(message = self)
+        if images.exists():
+            for image in images:
+                images_urls.append({'small': '/static'+str(image.image_ultra.url), 'big': '/static'+str(image.image.url)})
+            return images_urls
+        else:
+            return None
+
+class ImageMessage(models.Model):
+    message = models.ForeignKey(Message, on_delete = models.CASCADE, verbose_name="Сообщение", related_name = 'images')
+    image = models.ImageField(upload_to="messages_images/")
+    image_small = ImageSpecField([Adjust(contrast = 1, sharpness = 1), ResizeToFill(100, 100)], format = 'JPEG', options = {'quality' : 75})
+    image_ultra = ImageSpecField([Adjust(contrast = 1, sharpness = 1), ResizeToFill(50, 50)], format = 'JPEG', options = {'quality' : 50})
+
+    class Meta:
+        verbose_name = "Картинка сообщения"
+        verbose_name_plural = "Картинки сообщений"
+
+    def __str__(self):
+        return self.message.writer.username

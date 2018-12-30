@@ -25,6 +25,9 @@
                 <p v-if='message.writer.id == user.id'class='message-text right-message'>{{message.text}}</p>
                 <p v-else class='message-text left-message'>{{message.text}}</p>
 
+                <div v-if='message.images_data'>
+                  <img class = 'one-image' v-for = 'image in message.images_data' :name='image.big' :src="image.small" alt="image" @click='showInGallery(image.big)'>
+                </div>
 
                 <p v-if='message.writer.id == user.id' class='message-date right-message'>{{message.pub_date}}</p>
                 <p v-else class='message-date left-message'>{{message.pub_date}}</p>
@@ -38,6 +41,9 @@
                 <p v-if='message.writer.id == user.id'class='message-text right-message'>{{message.text}}</p>
                 <p v-else class='message-text left-message'>{{message.text}}</p>
 
+                <div v-if='message.images_data'>
+                  <img class = 'one-image' v-for = 'image in message.images_data' :name='image.big' :src="image.small" alt="image" @click='showInGallery(image.big)'>
+                </div>
 
                 <p v-if='message.writer.id == user.id' class='message-date right-message'>{{message.pub_date}}</p>
                 <p v-else class='message-date left-message'>{{message.pub_date}}</p>
@@ -52,6 +58,9 @@
                 <p v-if='message.writer.id == user.id'class='message-text right-message'>{{message.text}}</p>
                 <p v-else class='message-text left-message'>{{message.text}}</p>
 
+                <div v-if='message.images_data'>
+                  <img class = 'one-image' v-for = 'image in message.images_data' :name='image.big' :src="image.small" alt="image" @click='showInGallery(image.big)'>
+                </div>
 
                 <p v-if='message.writer.id == user.id' class='message-date right-message'>{{message.pub_date}}</p>
                 <p v-else class='message-date left-message'>{{message.pub_date}}</p>
@@ -64,8 +73,25 @@
 
           <div class='print-block'>
             <mu-text-field id='message-input' v-model="form.textarea" placeholder="Отправьте новое сообщение"></mu-text-field>
+            <i class="fas fa-camera fa-2x" @click="openAddImageMessageWindow"></i>
             <mu-button round color="secondary" @click="sendMessage">Отправить</mu-button>
           </div>
+
+          <mu-dialog width="600" max-width="80%" :esc-press-close="false" :overlay-close="false" :open.sync="ImageMessageAddWindow">
+              <p style = 'font-size:120%;'>Добавьте изображения к вашему сообщению</p>
+              <span>Вы можете прикрепить до 10 изображений</span><br>
+
+            <form id="uploadMessageForm" name="uploadMessageForm" enctype="multipart/form-data">
+
+               <input type="file" id="messageimages" name="messageimages" multiple v-on:change='changeMessageImageInput'><br>
+
+            </form>
+
+              <mu-button slot="actions" flat color="primary" @click="closeImageMessageAddWindow">Отмена</mu-button>
+              <mu-button slot="actions" flat color="secondary" @click="hookMessageImages">Прикрепить</mu-button>
+          </mu-dialog>
+
+          <GallerySlot v-if='this.$root.openGallerySlot'></GallerySlot>
 
     </HomeSlot>
   </div>
@@ -74,6 +100,9 @@
 <script>
 
     import HomeSlot from '@/components/Home.vue'
+    import GallerySlot from '@/components/Gallery.vue'
+
+    import axios from 'axios'
 
     export default{
       name: 'Messenger',
@@ -82,6 +111,7 @@
       },
       components: {
         HomeSlot,
+        GallerySlot,
       },
       data() {
         return {
@@ -92,6 +122,8 @@
           },
           last: '',
           chat: '',
+          ImageMessageAddWindow: false,
+          hooked_MessageFormData: '',
         }
       },
       created() {
@@ -108,6 +140,33 @@
 
       },
       methods: {
+        showInGallery(url){
+          this.$root.currentUrl = url
+          this.$root.galleryUrls = new Array()
+          var curr = document.getElementsByName(url)[0]
+          var bros = curr.parentNode.children;
+          for (var i = 0; i < bros.length; ++i){
+              this.$root.galleryUrls = this.$root.galleryUrls.concat(bros[i].getAttribute('name'))
+          }
+          this.$root.openGallerySlot = true
+        },
+        openAddImageMessageWindow(){
+          this.ImageMessageAddWindow = true
+        },
+        closeImageMessageAddWindow(){
+          this.ImageMessageAddWindow = false
+        },
+        changeMessageImageInput(){
+          var input = document.getElementById('messageimages')
+          if (input.files.length>10){
+            input.value = ""
+            alert('Вы не можете отправлять более 10 изображений за раз. Добавьте изображения заново.')
+          }
+        },
+        hookMessageImages(){
+          this.hooked_MessageFormData = new FormData(document.getElementById('uploadMessageForm'))
+          this.ImageMessageAddWindow = false
+        },
         keyWriteListener(event){
           if (event.keyCode == 13){
             if (document.activeElement == document.getElementById('message-input')){
@@ -122,16 +181,27 @@
           this.$router.push({name: 'wall', params: {id: id}})
         },
         newMessages(){
-          var newest = this.messages[this.messages.length - 1].id
+          if (this.messages.length){
+            var newest = this.messages[this.messages.length - 1].id
+          }
+          else{
+            var newest = 0
+          }
           $.ajax({
-            url: 'http://127.0.0.1:8000/api/messenger/new/' + this.$route.params.id + '/',
+            url: 'http://127.0.0.1:8000/api/messenger/new/',
             type: 'GET',
             data: {
+              id: this.chat.id,
               newest: newest,
             },
             success: (response)=>{
               if (response.data.not_new!=true){
-                this.messages = this.messages.concat(response.data.data)
+                if (this.messages.length){
+                  this.messages = this.messages.concat(response.data.data)
+                }
+                else{
+                  this.messages = response.data.data
+                }
               }
             },
           })
@@ -155,6 +225,7 @@
               ids,
             },
             success: (response)=>{
+              this.$root.pinkMessagesFunc()
               for (var i = 0; i < response.data.white.length; i++){
                 var elem = document.getElementById(response.data.white[i])
                 elem.classList.add("white")
@@ -201,23 +272,45 @@
           block.scrollTop = block.scrollHeight;
         },
         sendMessage(){
-          $.ajax({
-            url: 'http://127.0.0.1:8000/api/messenger/chat/' + this.$route.params.id + '/',
-            type: 'POST',
-            data: {
-                text: this.form.textarea
-            },
-            success: (response)=>{
-              this.form.textarea = ''
-              if (response.data.empty){
-                alert('Введите текст в поле ввода')
+          var text = this.form.textarea
+          if  (this.hooked_MessageFormData){
+            var s = this
+            const data = this.hooked_MessageFormData
+            data.append('text', text)
+            axios.post('http://127.0.0.1:8000/api/messenger/chat/' + this.$route.params.id + '/', data, {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': "Token " + sessionStorage.getItem('auth_token')
               }
-              else{
-                this.messages = this.messages.concat(response.data.data)
-              }
-            },
+            })
+              .then(response => {
+                this.form.textarea = ''
+                this.hooked_MessageFormData =''
+                this.messages = this.messages.concat(response.data.data.data)
+              })
+              .catch(error => {
+                alert('Ошибка. Повторите снова')
+              })
+          }
+          else{
+            $.ajax({
+              url: 'http://127.0.0.1:8000/api/messenger/chat/' + this.$route.params.id + '/',
+              type: 'POST',
+              data: {
+                  text: text
+              },
+              success: (response)=>{
+                this.form.textarea = ''
+                if (response.data.empty){
+                  alert('Введите текст в поле ввода')
+                }
+                else{
+                  this.messages = this.messages.concat(response.data.data)
+                }
+              },
 
-          })
+            })
+          }
         },
         loadMyUser(){
           $.ajax({
@@ -292,5 +385,8 @@
 .grey{
   background-color:rgb(242, 248, 250);
 }
-
+.one-image{
+  margin-left: 3px;
+  margin-right: 3px;
+}
 </style>
