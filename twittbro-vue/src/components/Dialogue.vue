@@ -90,7 +90,6 @@
           chat: '',
           ImageMessageAddWindow: false,
           hooked_MessageFormData: '',
-          isActive: true,
         }
       },
       created() {
