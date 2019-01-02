@@ -5,7 +5,6 @@
         <div class="user-info">
           <p class="user-name">{{user.first_name}} {{user.last_name}}</p>
           <img class='avatar' alt=''/>
-
         </div>
 
           <div class="chat-info">
@@ -17,40 +16,7 @@
 
             <div class='central-strip' v-for='message in messages' :value='message.id'>
 
-              <div class='one-message grey my_grey' v-if='message.my_grey' :id='message.id'>
-                <p v-if='message.writer.id == user.id' class='message-author right-message' >{{message.writer.first_name}}</p>
-                <p v-else class='message-author left-message' >{{message.writer.first_name}}</p>
-
-
-                <p v-if='message.writer.id == user.id'class='message-text right-message'>{{message.text}}</p>
-                <p v-else class='message-text left-message'>{{message.text}}</p>
-
-                <div v-if='message.images_data'>
-                  <img class = 'one-image' v-for = 'image in message.images_data' :name='image.big' :src="image.small" alt="image" @click='showInGallery(image.big)'>
-                </div>
-
-                <p v-if='message.writer.id == user.id' class='message-date right-message'>{{message.pub_date}}</p>
-                <p v-else class='message-date left-message'>{{message.pub_date}}</p>
-
-              </div>
-              <div class='one-message grey' v-else-if='message.grey' :id='message.id'>
-                <p v-if='message.writer.id == user.id' class='message-author right-message' >{{message.writer.first_name}}</p>
-                <p v-else class='message-author left-message' >{{message.writer.first_name}}</p>
-
-
-                <p v-if='message.writer.id == user.id'class='message-text right-message'>{{message.text}}</p>
-                <p v-else class='message-text left-message'>{{message.text}}</p>
-
-                <div v-if='message.images_data'>
-                  <img class = 'one-image' v-for = 'image in message.images_data' :name='image.big' :src="image.small" alt="image" @click='showInGallery(image.big)'>
-                </div>
-
-                <p v-if='message.writer.id == user.id' class='message-date right-message'>{{message.pub_date}}</p>
-                <p v-else class='message-date left-message'>{{message.pub_date}}</p>
-
-              </div>
-
-              <div class='one-message white' v-else :id='message.id'>
+              <div class='one-message' v-bind:class="{ grey: message.grey, my_grey: message.my_grey }":id='message.id'>
                 <p v-if='message.writer.id == user.id' class='message-author right-message' >{{message.writer.first_name}}</p>
                 <p v-else class='message-author left-message' >{{message.writer.first_name}}</p>
 
@@ -124,6 +90,7 @@
           chat: '',
           ImageMessageAddWindow: false,
           hooked_MessageFormData: '',
+          isActive: true,
         }
       },
       created() {

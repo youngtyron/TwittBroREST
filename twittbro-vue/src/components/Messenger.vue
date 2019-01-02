@@ -4,7 +4,6 @@
         <div class="user-info">
           <p class="user-name">{{user.first_name}} {{user.last_name}}</p>
           <img class='avatar' alt=''/>
-
         </div>
 
           <div class='central-strip' v-for='chat in chats' >

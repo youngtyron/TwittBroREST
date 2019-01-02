@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from messenger.models import Chat, Message
 from profiles.serializers import UserSerializer
+import datetime
 
 
 class ChatSerializer(serializers.ModelSerializer):
@@ -26,6 +27,7 @@ class MessagesSerializer(serializers.ModelSerializer):
     images_data = serializers.SerializerMethodField()
     grey = serializers.SerializerMethodField()
     my_grey = serializers.SerializerMethodField()
+    pub_date = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
@@ -40,3 +42,10 @@ class MessagesSerializer(serializers.ModelSerializer):
 
     def get_images_data(self, obj):
         return obj.images_urls()
+
+    def get_pub_date(self, obj):
+        today = datetime.datetime.today()
+        if obj.pub_date.date() < today.date():
+            return obj.pub_date.date()
+        else:
+            return obj.pub_date.time().strftime("%H-%M")
