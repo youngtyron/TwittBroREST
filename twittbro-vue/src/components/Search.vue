@@ -30,9 +30,6 @@
 
     export default{
       name: 'Search',
-      // props: {
-      //     text: '',
-      // },
       data() {
         return {
           posts: '',
@@ -64,7 +61,7 @@
           this.posts = ''
           this.users = ''
                 $.ajax({
-                   url: 'http://127.0.0.1:8000/api/profiles/load_results/',
+                   url: this.$root.baseUrl +'api/profiles/load_results/',
                    type: "GET",
                    data: {
                      text: text,
@@ -96,7 +93,7 @@
           }
           var question = this.question
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/profiles/append_results/',
+             url: this.$root.baseUrl +'api/profiles/append_results/',
              type: "GET",
              data: {
                last: last,
@@ -115,7 +112,7 @@
         },
         likePost(event){
           $.ajax({
-            url: 'http://127.0.0.1:8000/api/profiles/like_post/',
+            url: this.$root.baseUrl +'api/profiles/like_post/',
             type: 'POST',
             data: {
                 id: event.target.parentNode.getAttribute('value')

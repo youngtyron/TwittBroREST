@@ -1,26 +1,19 @@
 <template>
   <HomeSlot>
     <div class='register-block'>
-      <!-- <input v-model='username' type='text' placeholder="Логин"/> -->
       <mu-text-field v-model="username" placeholder="Логин"></mu-text-field>
       </br>
-      <!-- <input v-model='first_name' type='text' placeholder="Имя"/> -->
       <mu-text-field v-model="first_name" placeholder="Имя"></mu-text-field>
       </br>
-      <!-- <input v-model='last_name' type='text' placeholder="Фамилия"/> -->
       <mu-text-field v-model="last_name" placeholder="Фамилия"></mu-text-field>
       </br>
-      <!-- <input v-model='email' type='text' placeholder="Электронная почта"/> -->
       <mu-text-field v-model="email" type="email" placeholder="Электронная почта"></mu-text-field>
       </br>
-      <!-- <input v-model='password' type='password' placeholder="Пароль"/> -->
       <mu-text-field v-model="password" type='password' placeholder="Пароль"></mu-text-field>
       </br>
-      <!-- <input v-model='confirm_password' type='password' placeholder="Подтверждение пароля"/> -->
       <mu-text-field v-model="confirm_password" type='password' placeholder="Подтверждение пароля"></mu-text-field>
       </br>
       <mu-button color="primary" @click="registrateUser">Отправить</mu-button>
-      <!-- <button @click='registrateUser'>Отправить</button> -->
       </br>
       <p class='blue-link' @click='goLogin'>Уже зарегистрированы?</p>
     </div>
@@ -50,7 +43,7 @@ import HomeSlot from '@/components/Home.vue'
       methods: {
         registrateUser(){
           $.ajax({
-            url: 'http://127.0.0.1:8000/api/registate/',
+            url: this.$root.baseUrl +'/api/registate/',
             type:'POST',
             data: {
               username: this.username,

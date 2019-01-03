@@ -154,7 +154,7 @@
             var newest = 0
           }
           $.ajax({
-            url: 'http://127.0.0.1:8000/api/messenger/new/',
+            url: this.$root.baseUrl +'api/messenger/new/',
             type: 'GET',
             data: {
               id: this.chat.id,
@@ -185,7 +185,7 @@
             ids[i]=grey[i].parentNode.getAttribute('value')
           }
           $.ajax({
-            url: 'http://127.0.0.1:8000/api/messenger/read/' + this.$route.params.id + '/',
+            url: this.$root.baseUrl +'api/messenger/read/' + this.$route.params.id + '/',
             type: 'POST',
             data: {
               ids,
@@ -214,7 +214,7 @@
             var last = this.messages[0].id
           }
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/messenger/chat/' + this.$route.params.id + '/',
+             url: this.$root.baseUrl +'api/messenger/chat/' + this.$route.params.id + '/',
              type: "GET",
              data: {
                last: last,
@@ -243,7 +243,7 @@
             var s = this
             const data = this.hooked_MessageFormData
             data.append('text', text)
-            axios.post('http://127.0.0.1:8000/api/messenger/chat/' + this.$route.params.id + '/', data, {
+            axios.post(this.$root.baseUrl +'api/messenger/chat/' + this.$route.params.id + '/', data, {
               headers: {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': "Token " + sessionStorage.getItem('auth_token')
@@ -260,7 +260,7 @@
           }
           else{
             $.ajax({
-              url: 'http://127.0.0.1:8000/api/messenger/chat/' + this.$route.params.id + '/',
+              url: this.$root.baseUrl +'api/messenger/chat/' + this.$route.params.id + '/',
               type: 'POST',
               data: {
                   text: text
@@ -280,7 +280,7 @@
         },
         loadMyUser(){
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/profiles/user_news/',
+             url: this.$root.baseUrl +'api/profiles/user_news/',
              type: "GET",
              success: (response) => {
                 this.user =  response.data.data
@@ -288,10 +288,9 @@
              }
           })
         },
-
         getAva(){
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/profiles/avatarnews/',
+             url: this.$root.baseUrl +'api/profiles/avatarnews/',
              type: "GET",
              success: (response) => {
                  var ava_url = '/static' + response.data.data

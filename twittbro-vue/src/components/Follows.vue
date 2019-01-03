@@ -46,7 +46,7 @@
       methods: {
         loadFollowings(){
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/profiles/followings/',
+             url: this.$root.baseUrl +'api/profiles/followings/',
              type: "GET",
              success: (response) => {
                  this.follows =  response.data.data
@@ -56,7 +56,7 @@
 
         loadMyUser(){
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/profiles/user_news/',
+             url: this.$root.baseUrl +'api/profiles/user_news/',
              type: "GET",
              success: (response) => {
                 this.user =  response.data.data
@@ -65,12 +65,11 @@
           })
         },
         userLink(id){
-          // var id = event.target.parentNode.getAttribute('value')
           this.$router.push({name: 'wall', params: {id: id}})
         },
         getAva(){
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/profiles/avatarnews/',
+             url: this.$root.baseUrl +'api/profiles/avatarnews/',
              type: "GET",
              success: (response) => {
                  var ava_url = '/static' + response.data.data

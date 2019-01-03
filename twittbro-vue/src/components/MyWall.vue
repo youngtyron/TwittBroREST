@@ -16,7 +16,7 @@
       methods: {
         redirectWall(){
               $.ajax({
-                 url: 'http://127.0.0.1:8000/api/get_id/',
+                 url: this.$root.baseUrl +'api/get_id/',
                  type: "GET",
                  success: (response) => {
                    this.$router.push({name: 'wall', params: {id: response.data.id}})

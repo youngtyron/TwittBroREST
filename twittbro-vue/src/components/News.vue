@@ -111,7 +111,7 @@
       methods: {
         repost(id){
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/profiles/repost/',
+             url: this.$root.baseUrl +'api/profiles/repost/',
              type: "POST",
              data: {
                  id: id,
@@ -143,7 +143,7 @@
             const data = this.hooked_CommentFormData
             data.append('text', text)
             data.append('post', post.id)
-            axios.post('http://127.0.0.1:8000/api/profiles/comments/', data, {
+            axios.post(this.$root.baseUrl +'api/profiles/comments/', data, {
               headers: {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': "Token " + sessionStorage.getItem('auth_token')
@@ -174,7 +174,7 @@
           }
           else{
             $.ajax({
-               url: 'http://127.0.0.1:8000/api/profiles/comments/',
+               url: this.$root.baseUrl +'api/profiles/comments/',
                type: "POST",
                data: {
                    post: post.id,
@@ -231,7 +231,7 @@
           $(parent).find('.hide-comments').css('display', 'block')
           if  (!post.comments.length){
             $.ajax({
-               url: 'http://127.0.0.1:8000/api/profiles/comments/',
+               url: this.$root.baseUrl +'api/profiles/comments/',
                type: "GET",
                data: {
                    post: post.id,
@@ -277,7 +277,7 @@
             var last = this.posts[this.posts.length - 1].id
           }
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/profiles/news/',
+             url: this.$root.baseUrl +'api/profiles/news/',
              type: "GET",
              data: {
                  last: last,
@@ -298,7 +298,7 @@
 
         loadMyUser(){
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/profiles/user_news/',
+             url: this.$root.baseUrl +'api/profiles/user_news/',
              type: "GET",
              success: (response) => {
                 this.user =  response.data.data
@@ -307,7 +307,7 @@
         },
         getAva(){
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/profiles/avatarnews/',
+             url: this.$root.baseUrl +'api/profiles/avatarnews/',
              type: "GET",
              success: (response) => {
                  var ava_url = '/static' + response.data.data
@@ -320,7 +320,7 @@
         },
         likePost(event){
           $.ajax({
-            url: 'http://127.0.0.1:8000/api/profiles/like_post/',
+            url: this.$root.baseUrl +'api/profiles/like_post/',
             type: 'POST',
             data: {
                 id: event.target.parentNode.getAttribute('value')

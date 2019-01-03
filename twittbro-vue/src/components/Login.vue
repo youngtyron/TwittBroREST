@@ -32,7 +32,7 @@
       methods: {
         setLogin(){
           $.ajax({
-            url: 'http://127.0.0.1:8000/auth/token/create/',
+            url: this.$root.baseUrl +'auth/token/create/',
             type:'POST',
             data: {
               username: this.login,

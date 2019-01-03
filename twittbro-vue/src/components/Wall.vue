@@ -209,7 +209,7 @@
         },
         repost(id){
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/profiles/repost/',
+             url: this.$root.baseUrl +'api/profiles/repost/',
              type: "POST",
              data: {
                  id: id,
@@ -248,7 +248,7 @@
             const data = this.hooked_CommentFormData
             data.append('text', text)
             data.append('post', post.id)
-            axios.post('http://127.0.0.1:8000/api/profiles/comments/', data, {
+            axios.post(this.$root.baseUrl +'api/profiles/comments/', data, {
               headers: {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': "Token " + sessionStorage.getItem('auth_token')
@@ -279,7 +279,7 @@
           }
           else{
             $.ajax({
-               url: 'http://127.0.0.1:8000/api/profiles/comments/',
+               url: this.$root.baseUrl +'api/profiles/comments/',
                type: "POST",
                data: {
                    post: post.id,
@@ -330,7 +330,7 @@
           $(parent).find('.hide-comments').css('display', 'block')
           if  (!post.comments.length){
             $.ajax({
-               url: 'http://127.0.0.1:8000/api/profiles/comments/',
+               url: this.$root.baseUrl +'api/profiles/comments/',
                type: "GET",
                data: {
                    post: post.id,
@@ -366,7 +366,6 @@
           this.hooked_FormData = new FormData(document.getElementById('uploadPostForm'))
           this.ImagePostAddWindow = false
           var input = document.getElementById('postimages')
-          console.log(input.files.length)
           if (input.files.length == 1){
             this.count_hooked = 'Прикреплено 1 изображение'
           }
@@ -388,7 +387,7 @@
           const data = new FormData(document.getElementById('uploadForm'))
           var imagefile = document.querySelector('#files')
           data.append('file', imagefile.files[0])
-          axios.post('http://127.0.0.1:8000/api/profiles/change_avatar/', data, {
+          axios.post(this.$root.baseUrl +'api/profiles/change_avatar/', data, {
             headers: {
               'Content-Type': 'multipart/form-data',
               'Authorization': "Token " + sessionStorage.getItem('auth_token')
@@ -412,7 +411,7 @@
         addSelectedChat(){
           var chat = this.selectedChat
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/messenger/get_chats_to_add_user/' + this.$route.params.id + '/',
+             url: this.$root.baseUrl +'api/messenger/get_chats_to_add_user/' + this.$route.params.id + '/',
              type: "POST",
              data: {
                  chat: chat,
@@ -429,7 +428,7 @@
 
         getChats(){
           $.ajax({
-            url: 'http://127.0.0.1:8000/api/messenger/get_chats_to_add_user/' + this.$route.params.id + '/',
+            url: this.$root.baseUrl +'api/messenger/get_chats_to_add_user/' + this.$route.params.id + '/',
             type: 'GET',
             success: (response)=>{
               this.chats = response.data.data
@@ -438,7 +437,7 @@
         },
         writeMessage(){
           $.ajax({
-            url: 'http://127.0.0.1:8000/api/messenger/write/' + this.$route.params.id + '/',
+            url: this.$root.baseUrl +'api/messenger/write/' + this.$route.params.id + '/',
             type: 'POST',
             data: {
                 text: this.form2.textarea2
@@ -477,7 +476,7 @@
         },
         getAva(){
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/profiles/avatar/' + this.$route.params.id + '/',
+             url: this.$root.baseUrl +'api/profiles/avatar/' + this.$route.params.id + '/',
              type: "GET",
              success: (response) => {
                  var ava_url = '/static' + response.data.data
@@ -490,7 +489,7 @@
         },
         followUser(){
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/profiles/follow/' + this.$route.params.id + '/',
+             url: this.$root.baseUrl +'api/profiles/follow/' + this.$route.params.id + '/',
              type: "POST",
              success: (response) => {
                if (response.data.create_follow){
@@ -510,7 +509,7 @@
         },
         loadUser(){
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/profiles/user/' + this.$route.params.id + '/',
+             url: this.$root.baseUrl + 'api/profiles/user/' + this.$route.params.id + '/',
              type: "GET",
              success: (response) => {
                 this.user =  response.data.data
@@ -527,9 +526,8 @@
             else{
               var last = this.posts[this.posts.length - 1].id
             }
-
             $.ajax({
-               url: 'http://127.0.0.1:8000/api/profiles/posts/' + this.$route.params.id + '/',
+               url: this.$root.baseUrl + 'api/profiles/posts/' + this.$route.params.id + '/',
                type: "GET",
                data: {
                    last: last,
@@ -555,7 +553,7 @@
             var s = this
             const data = this.hooked_FormData
             data.append('text', this.form.textarea)
-            axios.post('http://127.0.0.1:8000/api/profiles/posts/' + this.$route.params.id + '/', data, {
+            axios.post(this.$root.baseUrl +'api/profiles/posts/' + this.$route.params.id + '/', data, {
               headers: {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': "Token " + sessionStorage.getItem('auth_token')
@@ -583,7 +581,7 @@
 
           else {
             $.ajax({
-              url: 'http://127.0.0.1:8000/api/profiles/posts/' + this.$route.params.id + '/',
+              url: this.$root.baseUrl +'api/profiles/posts/' + this.$route.params.id + '/',
               type: 'POST',
               data: {
                   text: this.form.textarea
@@ -613,7 +611,7 @@
         deletePost(event){
           var id = event.target.parentNode.getAttribute('value')
           $.ajax({
-            url: 'http://127.0.0.1:8000/api/profiles/delete_post/' + this.$route.params.id + '/',
+            url: this.$root.baseUrl +'api/profiles/delete_post/' + this.$route.params.id + '/',
             type: 'POST',
             data: {
                 id: id,
@@ -633,7 +631,7 @@
         },
         likePost(event){
           $.ajax({
-            url: 'http://127.0.0.1:8000/api/profiles/like_post/',
+            url: this.$root.baseUrl +'api/profiles/like_post/',
             type: 'POST',
             data: {
                 id: event.target.parentNode.getAttribute('value')

@@ -61,7 +61,7 @@
         createChat(){
           var users = this.selectedUser
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/messenger/createchat/',
+             url: this.$root.baseUrl +'api/messenger/createchat/',
              data: {
                users: users,
              },
@@ -81,7 +81,7 @@
         },
         getPeople(){
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/messenger/createchat/',
+             url: this.$root.baseUrl +'api/messenger/createchat/',
              type: "GET",
              success: (response) => {
                  this.people =  response.data.data
@@ -93,7 +93,7 @@
         },
         loadChats(){
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/messenger/chats/',
+             url: this.$root.baseUrl +'api/messenger/chats/',
              type: "GET",
              success: (response) => {
                  this.chats =  response.data.data
@@ -107,7 +107,7 @@
 
         loadMyUser(){
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/profiles/user_news/',
+             url: this.$root.baseUrl +'api/profiles/user_news/',
              type: "GET",
              success: (response) => {
                 this.user =  response.data.data
@@ -120,7 +120,7 @@
         // },
         getAva(){
           $.ajax({
-             url: 'http://127.0.0.1:8000/api/profiles/avatarnews/',
+             url: this.$root.baseUrl +'api/profiles/avatarnews/',
              type: "GET",
              success: (response) => {
                  var ava_url = '/static' + response.data.data
