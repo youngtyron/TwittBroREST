@@ -215,8 +215,6 @@
                  id: id,
              },
              success: (response) => {
-               console.log('success')
-
              },
              error: (response)=> {
                alert('Ошибка. Повторите снова')

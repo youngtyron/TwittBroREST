@@ -115,9 +115,6 @@
              }
           })
         },
-        // userLink(id){
-        //   this.$router.push({name: 'wall', params: {id: id}})
-        // },
         getAva(){
           $.ajax({
              url: this.$root.baseUrl +'api/profiles/avatarnews/',

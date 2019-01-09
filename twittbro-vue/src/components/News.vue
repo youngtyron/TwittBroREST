@@ -370,8 +370,6 @@
     color: #039be5;
   }
   .central-strip{
-    /* border: 1px solid #C1C1C1; */
-
     width: 60%;
     margin: auto;
   }

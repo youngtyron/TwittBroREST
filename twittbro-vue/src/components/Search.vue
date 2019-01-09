@@ -158,10 +158,6 @@
     font-size: 150%;
     color: #039be5;
   }
-  /* .user-name{
-    font-size: 150%;
-    color: #039be5;
-  } */
   .central-strip{
     width: 60%;
     margin: auto;

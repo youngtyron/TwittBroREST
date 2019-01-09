@@ -85,9 +85,7 @@
 <style scoped>
 
 .fa-arrow-circle-left{
-  /* vertical-align: middle; */
   position: fixed;
-	/* right: 95%; */
 	top: 50%;
   z-index: 101!important;
 }

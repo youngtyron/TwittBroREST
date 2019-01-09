@@ -3,7 +3,6 @@
     <div class="login-block">
       <mu-text-field id='login-input' v-model="login" placeholder="Логин"></mu-text-field></br>
       <mu-text-field id='password-input' v-model="password" type='password' placeholder="Пароль"></mu-text-field></br>
-      <!-- <button @click='setLogin'>Войти</button> -->
       <mu-button color="primary" @click="setLogin">Войти</mu-button>
       <p class='blue-link' @click='goRegistrate'>Зарегистрироваться</p>
     </div>
