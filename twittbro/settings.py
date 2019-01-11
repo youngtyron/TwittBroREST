@@ -94,6 +94,16 @@ WSGI_APPLICATION = 'twittbro.wsgi.application'
 #         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
 #     }
 # }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'twittbro_base',
+        'USER': 'twittbro_user',
+        'PASSWORD': '1234',
+        'HOST':'127.0.0.1',
+        'PORT': '',
+    }
+}
 
 
 # Password validation
@@ -172,8 +182,8 @@ REST_FRAMEWORK = {
 }
 
 
-
-try:
-    from .local_settings import *
-except ImportError:
-    from .prod_settings import *
+# 
+# try:
+#     from .local_settings import *
+# except ImportError:
+#     from .prod_settings import *

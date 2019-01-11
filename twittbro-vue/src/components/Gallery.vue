@@ -90,6 +90,8 @@
   z-index: 101!important;
 }
 .fa-arrow-circle-right{
-  vertical-align: middle;
+  position: fixed;
+  top: 50%;
+  z-index: 101!important;
 }
 </style>
